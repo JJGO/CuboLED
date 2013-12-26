@@ -36,8 +36,8 @@ _FICD(ICS_PGD1 & JTAGEN_OFF);
 int main(void){
     mainInit();
     cubeInit();
-    //putAxis(X,0,0,0xEE);
-    //putAxis(Y,0,0,0x11);
+    putAxis(X,0,0,0xEE);
+    putAxis(Y,0,0,0x11);
     while(1);
 
      

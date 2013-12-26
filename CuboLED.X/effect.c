@@ -1,4 +1,5 @@
 
+#include "effect.h"
 
 void drawCube(uint8_t edge,uint8_t x,uint8_t y,uint8_t z)
 {
@@ -27,23 +28,24 @@ void drawCube(uint8_t edge,uint8_t x,uint8_t y,uint8_t z)
 
 
 //5 Efecto lluvia
-void rain(void)
-{
-    i--;
-    if(i<=0)
-        i=7;
+// void rain(void)
+// {
+//     static int i;
+//     i--;
+//     if(i<=0)
+//         i=7;
 
-    if(i%2=1){
-        for(j=0;j<=N; j++)
-        {
-            srand (time (NULL));
-            leds=rand()%8;
-            putAxis(X, j, i, leds);
+//     if(i%2=1){
+//         for(j=0;j<=N; j++)
+//         {
+//             srand (time (NULL));
+//             leds=rand()%8;
+//             putAxis(X, j, i, leds);
             
-        }
-        putPlane(Z,i-1,getPlane(Z,i));
-    }
-}
+//         }
+//         putPlane(Z,i-1,getPlane(Z,i));
+//     }
+// }
 
 //6 Cubo que cambia de tamaño y posicion
         //Cubo tamaño n
@@ -66,46 +68,32 @@ void rain(void)
         // }
 
 //7  Efecto anillos que se juntan
-void ringMovement(void)
-{
-    for(j=-4;j<=11;j++)
-    {
-        z=j;
-        for(i=1;i<=4;i++)
-        {
-            z = j;
-            if(j<=0)
-            {
-                z=0;
-            }else if(j>=7){
-                z=7;
-            }
-            ring(i,z);
-            ring(i,7-z);
-        }
-    }
-}
+// void ringMovement(void)
+// {
+//     int i,j,z;
+//     for(j=-4;j<=11;j++)
+//     {
+//         z=j;
+//         for(i=1;i<=4;i++)
+//         {
+//             z = j;
+//             if(j<=0)
+//             {
+//                 z=0;
+//             }else if(j>=7){
+//                 z=7;
+//             }
+//             ring(i,z);
+//             ring(i,7-z);
+//         }
+//     }
+// }
 
-//8 Ir rellenando el cubo desde una esquina
-        //Variable d varía con cada ciclo de reloj
-void setOblique(int d)
-{
-    clearCube();
-    for(i=0;i<=8;i++)
-    {
-        for(j=0;j<=8;j++)
-        {
-            for(k=0;k<=8;k++)
-
-                if(x+y+k==d)
-                    setVoxel(i,j,k);
-        }
-    }
-}
-
+/*
 //9 Pasar los LEDs de un lado al contrario de forma aleatoria
 void RandomMoveVertical(void)
 {
+    int i,j,axis,d;
     for(i=0; i<=7; i++)
     {
         for(j=0; j<=7; j++)
@@ -126,16 +114,65 @@ void RandomMoveVertical(void)
 
     }
 }
-
+*/
 /*Nombre: Ring
  * Descripcion: Crea un anillo de lado l
  * Argumentos: l (lado) y z (plano en el que se pone el anillo)
  * Valor devuelto: Ninguno*/
- void ring(int l, int z)
- {
+void ring(int l, int z)
+{
     int a=4-l;
     putAxis(X, a, z, (0xFF>>2*a)<<a);
-    putAxis(X, 7-2*a, z, (0xFF>>2*a)<<a);
+    putAxis(X, 7-a, z, (0xFF>>2*a)<<a);
     putAxis(Y, a, z, (0xFF>>2*a)<<a);
-    putAxis(Y, 7-2*a, z, (0xFF>>2*a)<<a);
- }
+    putAxis(Y, 7-a, z, (0xFF>>2*a)<<a);
+}
+
+
+
+         //Variable d varía con cada ciclo de reloj
+void setOblique(int d)
+{
+    int i,j,k;
+    clearCube();
+    for(i=0;i<8;i++)
+    {
+        for(j=0;j<8;j++)
+        {
+            for(k=0;k<8;k++)
+
+                if(i+j+k==d)
+                    setVoxel(i,j,k);
+        }
+    }
+}
+
+void animateCube(int r)
+{
+
+    static int x = 0, y = 0, z = 0;
+    static int i = 0, j = 0;
+    static char growing = true;
+    const char min = 3,max = 8;
+    if(growing){
+        i++;
+        if(i > max){
+            i = max;
+            growing = false;
+
+            j = r;
+            x = (j) & 0x1;
+            y = (j>>1) & 0x1;
+            z = (j>>2) & 0x1;
+        }
+    }else{
+        i--;
+        if(i < min){
+            i = min;
+            growing = true;
+            
+        }
+    }
+    clearCube();
+    drawCube(i,x*(8-i),y*(8-i),z*(8-i));    
+}

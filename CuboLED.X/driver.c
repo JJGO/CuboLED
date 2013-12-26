@@ -138,8 +138,8 @@ void vTimer1(void){
     
     };
 
-    const static unsigned char mensaje[17] = {"BLANCA MARGARITA"};
-    static unsigned int lenMensaje = 17;
+    const static unsigned char mensaje[12] = {"JOSE JAVIER"};
+    static unsigned int lenMensaje = 12;
 
 
     ticksVT1++;
@@ -151,26 +151,26 @@ void vTimer1(void){
         {  
 //1         
             case 1:
-                clearCube();
+                // clearCube();
 
-                j++;
-                if(j >= 12)
-                    j=0;
-                z=j;
-                for(i=1;i<=4;i++)
-                {
-                    z = j-(i-1);
-                    if(z<0)
-                    {
-                        z=0;
-                    }else if(z>7){
-                        z=7;
-                    }
-                    ring(i,z);
-                    ring(i,7-z);
-                }
+                // j++;
+                // if(j >= 12)
+                //     j=0;
+                // z=j;
+                // for(i=1;i<=4;i++)
+                // {
+                //     z = j-(i-1);
+                //     if(z<0)
+                //     {
+                //         z=0;
+                //     }else if(z>7){
+                //         z=7;
+                //     }
+                //     ring(i,z);
+                //     ring(i,7-z);
+                // }
                 
-                break;  
+                // break;  
 //2             
             case 2:
                 clearCube();
@@ -209,8 +209,8 @@ void vTimer1(void){
 
             case 4: 
                 
-                animateCube(ticksVT2);
-                break;
+                // animateCube(ticksVT2);
+                // break;
 
             case 5:
                 i++;
@@ -231,12 +231,12 @@ void vTimer1(void){
                 setVoxel(7,0,3);
                 break;
             case 7:
-                i++;
-                if(i >= 22)
-                    i = 0;
-                clearCube();
-                setOblique(i);
-                break;
+                // i++;
+                // if(i >= 22)
+                //     i = 0;
+                // clearCube();
+                // setOblique(i);
+                // break;
 
             default:
                 break;
@@ -427,7 +427,7 @@ void __attribute__((interrupt,no_auto_psv)) _T1Interrupt(void) {
     Refresh();
     vTimer1();
     
-    vTimer2();
+    //vTimer2();
     // vTimer3();
 
     //PWM1();
@@ -437,7 +437,7 @@ void __attribute__((interrupt,no_auto_psv)) _T1Interrupt(void) {
     // PWMPer1(50);
     // PWMPer2(50);
 
-    EdgeDetect(SWITCH);
+    //EdgeDetect(SWITCH);
 
     // watchUART();
 

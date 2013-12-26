@@ -2,9 +2,12 @@
 #define _EFFECT_H
 
 
-#include "cubo.h"
+//#include "cubo.h"
 
-void drawCube(uint8_t edge,uint8_t x,uint8_t y,uint8_t z);
+void drawCube(uint8_t,uint8_t,uint8_t ,uint8_t);
+void ring(int l, int z);
+void setOblique(int d);
+void animateCube(int r);
 
 
 #endif

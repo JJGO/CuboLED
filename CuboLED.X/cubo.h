@@ -8,7 +8,7 @@
 //Librerias utilizadas 
 #include "driver.h"
 #include "stdint.h"			// para el uso de int8_t
-#include "math.h"
+#include "effect.h"
 //#include "font8x8_basic.h"
 
 
@@ -42,16 +42,16 @@
 #define true 1
 #define false 0
 
-struct point 
-{
-	uint8_t x;
-	uint8_t y;
-	uint8_t z;
-};
+// struct point 
+// {
+// 	uint8_t x;
+// 	uint8_t y;
+// 	uint8_t z;
+// };
 
 
 // Variables globales
-//uint8_t
+
 static uint8_t voxel[N][N];
 
 // Prototipos de las funciones publicas
