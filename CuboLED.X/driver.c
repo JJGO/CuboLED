@@ -437,7 +437,7 @@ void __attribute__((interrupt,no_auto_psv)) _T1Interrupt(void) {
     // PWMPer1(50);
     // PWMPer2(50);
 
-    //EdgeDetect(SWITCH);
+    EdgeDetect(SWITCH);
 
     // watchUART();
 

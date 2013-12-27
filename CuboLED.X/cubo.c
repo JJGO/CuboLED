@@ -13,8 +13,8 @@
 
 void cubeInit(void)
 {
-    ForceInit();
-    //SPIinit();
+    //ForceInit();
+    SPIinit();
     clearCube();
 }
 
@@ -44,7 +44,8 @@ void SPI_PinRemap(void)
     RPOR3bits.RP7R  = 0x08; //0b01000;
     // Assign SS1OUT (SPI1 Slave Select) to pin RP6 (RB6)
     //01001
-    // No se usa el SS como tal RPOR3bits.RP6R    = 0b01001;
+    // No se usa el SS como tal 
+    RPOR3bits.RP6R  = 0x09; // 0b01001;
 
 
     // Lock Registers
@@ -81,11 +82,13 @@ void SPIinit(void)
     SPI1CON1bits.CKP = 0;   // Idle state for clock is a low level;
                             // active state is a high level
 
+    SPI1CON1bits.SPRE = 000;// Secondary prescaler 8:1
+    // SPI1CON1bits.PPRE = 10; // Primary prescaler 4:1
+    SPI1CON1bits.PPRE = 11; // Primary prescaler 1:1
+                            // FCY = 40 MHz -> SPI 1.25MHz
     SPI1CON1bits.SSEN = 0;  // Se utiza para clear por lo que se deshabilita
 
-    SPI1CON1bits.SPRE = 000;// Secondary prescaler 8:1
-    SPI1CON1bits.PPRE = 10; // Primary prescaler 4:1
-                            // FCY = 40 MHz -> SPI 1.25MHz
+    
 
     // SPI1CON2 - Not necessary
     // SPI1CON2bits.FRMEN = 1; // Framed SPIx support enabled (SSx pin used as frame sync pulse input/output)
@@ -101,11 +104,11 @@ void SPIinit(void)
 
     SPI1CON1bits.MSTEN = 1; // Master mode Enabled
     SPI1STATbits.SPIEN = 1; // Enable SPI module
-    SPI1BUF = 0x0000;       // Write data to be transmitted
+    // SPI1BUF = 0x55;       // Write data to be transmitted
 
                             // Interrupt Controller Settings
     IFS0bits.SPI1IF = 0;    // Clear the Interrupt Flag
-    IEC0bits.SPI1IE = 1;    // Enable the Interrupt
+    IEC0bits.SPI1IE = 0;    // Enable the Interrupt
     
     
 }
@@ -113,7 +116,7 @@ void SPIinit(void)
 void ForceInit(void)
 {
     //PORT Remap And Tristate configuration
-   
+    SPI_PinRemap();
     set(TRISB,11);      // SDI1
     clear(TRISB,10);    // SD01
     clear(TRISB,7);     // SCK
@@ -138,7 +141,7 @@ void Refresh(void)
         ticks = 0;
         // Se incrementa esta capa
         layer = mod(layer);
-        loadLayer(layer);
+        loadLayerSPI(layer);
         layer++;
     }
     
@@ -215,17 +218,11 @@ void loadLayerSPI(uint8_t layer)
     for(i = 0 ; i < TCLEAR; i++);
     _SS = 1;
     
-
-    _SS = 0;
-    //delay_us(TCLEAR);
-    for(i = 0 ; i < TCLEAR; i++);
-    _SS = 1;
-
     // Envio del identificador de capa 
     
     
     while(SPI1STATbits.SPITBF);
-    SPI1BUF = 0x80 >>layer;
+    SPI1BUF = 0x01 << layer;
     for(i = 7 ; i <= 7 ; i--)
     {
         // Envio de la configuracion de capa
