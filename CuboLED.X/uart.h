@@ -19,4 +19,5 @@ void Transmite(void);
 void PonerEnColaTransmisionUART(unsigned char uc_caracter); 
 unsigned char SacarDeColaRecepcionUART();
 void Transmite(void);
+
 #endif

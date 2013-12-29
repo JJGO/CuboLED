@@ -4,6 +4,27 @@
 
 #include "cubo.h"
 
+// ----------------------------------- PROTOTIPOS -----------------------------------------
+
+void cubeInit(void);
+void SPI_PinRemap(void);
+void SPIinit(void);
+void Refresh(void);
+void loadLayer(uint8_t layer);
+void setVoxel(int8_t x,int8_t y,int8_t z);
+void clearVoxel(int8_t x,int8_t y,int8_t z);
+void toggleVoxel(int8_t x,int8_t y,int8_t z);
+void putVoxel(int8_t x,int8_t y,int8_t z,uint8_t b);
+uint8_t getVoxel(int8_t x,int8_t y,int8_t z);
+void clearLayer(int8_t z);
+void setLayer(int8_t z);
+void clearCube(void);
+void setCube(void);
+void putAxis(uint8_t dim, int8_t coord1, int8_t coord2, const uint8_t config);
+void putPlane(uint8_t dim, int8_t coord, const uint8_t* config);
+uint8_t getAxis(uint8_t dim, int8_t coord1, int8_t coord2);
+uint8_t* getPlane(uint8_t dim, uint8_t coord);
+
 // ----------------------------------- FUNCIONES -----------------------------------------
 
 /* Nombre: cubeInit
@@ -13,7 +34,6 @@
 
 void cubeInit(void)
 {
-    //ForceInit();
     SPIinit();
     clearCube();
 }
@@ -30,6 +50,7 @@ void SPI_PinRemap(void)
 
     // Configure Input Functions
     // (See Table 30-1)
+
     // Assign SPI1 Data SDI to pin RP11 (RB11)
     RPINR20bits.SDI1R = 11;
 
@@ -37,16 +58,12 @@ void SPI_PinRemap(void)
     // (See Table 30-2)
     
     // Assign SSDO1 (Serial Data Out) to pin RP10 (RB10)
-    // 00111
     RPOR5bits.RP10R = 0x07; // 0b00111;
     //Asign SCK1OUT (Serial clock out) to pin RP7 (RB7)
-    // 01000
     RPOR3bits.RP7R  = 0x08; //0b01000;
     // Assign SS1OUT (SPI1 Slave Select) to pin RP6 (RB6)
-    //01001
     // No se usa el SS como tal 
     RPOR3bits.RP6R  = 0x09; // 0b01001;
-
 
     // Lock Registers
     __builtin_write_OSCCONL(OSCCON | (1<<6));
@@ -83,28 +100,13 @@ void SPIinit(void)
                             // active state is a high level
 
     SPI1CON1bits.SPRE = 000;// Secondary prescaler 8:1
-    // SPI1CON1bits.PPRE = 10; // Primary prescaler 4:1
     SPI1CON1bits.PPRE = 11; // Primary prescaler 1:1
-                            // FCY = 40 MHz -> SPI 1.25MHz
+                            // FCY = 40 MHz -> SPI 5MHz
+
     SPI1CON1bits.SSEN = 0;  // Se utiza para clear por lo que se deshabilita
-
-    
-
-    // SPI1CON2 - Not necessary
-    // SPI1CON2bits.FRMEN = 1; // Framed SPIx support enabled (SSx pin used as frame sync pulse input/output)
-    // SPI1CON2bits.SPIFSD = 0; //  Frame sync pulse output (master)
-    // SPI1CON2bits.FRMPOL = 0; // Frame sync pulse is active-low
-    // SPI1CON2bits.FRMDLY = 1; // Frame sync pulse coincides with first bit clock
-
-    //SPI1STAT - Not necessary
-    // SPI1STATbits.SPISIDL = 0; // continue moduel operation in idle mode
-    // SPI1STATbits.SPIROV; // flag de overflow en recibe
-    // SPI1STATbits.SPITBF;// flag de full en emite  SPI1TXB
-    // SPI1STATbits.SPIRBF; // flag de full en SPI1RXB
 
     SPI1CON1bits.MSTEN = 1; // Master mode Enabled
     SPI1STATbits.SPIEN = 1; // Enable SPI module
-    // SPI1BUF = 0x55;       // Write data to be transmitted
 
                             // Interrupt Controller Settings
     IFS0bits.SPI1IF = 0;    // Clear the Interrupt Flag
@@ -113,20 +115,8 @@ void SPIinit(void)
     
 }
 
-void ForceInit(void)
-{
-    //PORT Remap And Tristate configuration
-    SPI_PinRemap();
-    set(TRISB,11);      // SDI1
-    clear(TRISB,10);    // SD01
-    clear(TRISB,7);     // SCK
-    clear(TRISB,6);     // SS
-    _SS = 1;            // /Clear a 1
-}
-
-
 /* Nombre: Refresh
- * Descripción: Funcion que es llamada por la interrupcion cada 0.1ms
+ * Descripción: Funcion que es llamada por la interrupcion cada TREFRESH decimas de ms
                 Responsable de la multiplexacion , carga las capas una a una 
                 mediante loadLayer 
  * Argumentos: Ninguno
@@ -141,7 +131,7 @@ void Refresh(void)
         ticks = 0;
         // Se incrementa esta capa
         layer = mod(layer);
-        loadLayerSPI(layer);
+        loadLayer(layer);
         layer++;
     }
     
@@ -149,65 +139,11 @@ void Refresh(void)
 }
 
 /* Nombre: loadLayer
- * Descripción: Funcion de envio de datos en modo bloqueado
+ * Descripción: Funcion de envio de datos por SPI
  * Argumentos: el identificador de la capa a enviar al cubo
  * Valor devuelto: Ninguno */ 
 
 void loadLayer(uint8_t layer)
-{
-    static uint8_t x,y,i,fila;
-
-    // Clear de los shift registers
-
-    _SS = 0;
-    //delay_us(TCLEAR);
-    for(i = 0 ; i < TCLEAR; i++);
-
-    _SS = 1;
-
-    // Envio del identificador de capa 
-    for(i = 7 ; i <= 7 ; i--){
-        _SCK = 0;
-        if( i == layer)
-            _SDO = 1;
-        else
-            _SDO = 0;
-        //delay_us(TSCLK/2);
-        Nop();
-        Nop();
-        _SCK = 1;
-        //delay_us(TSCLK/2);
-        Nop();
-        Nop();
-    }
-
-
-    // Envio de la configuracion de capa
-    for(y = 7 ; y <= 7 ; y--)
-    {
-        fila = voxel[layer][y];
-        for(x = 7 ; x <= 7 ; x--)
-        {
-            _SCK = 0;
-            _SDO = fila >> x; //getVoxel(x,y,layer);
-            // delay_us(TSCLK/2);
-            _SCK = 1;
-            // delay_us(TSCLK/2);
-            
-        }
-    }
-    _SDO = 0; //
-    _SCK = 0;
-    //initTimer1();
-    
-}
-
-/* Nombre: loadLayer
- * Descripción: Funcion de envio de datos  por SPI
- * Argumentos: el identificador de la capa a enviar al cubo
- * Valor devuelto: Ninguno */ 
-
-void loadLayerSPI(uint8_t layer)
 {
     static uint8_t i;
 
@@ -219,7 +155,6 @@ void loadLayerSPI(uint8_t layer)
     _SS = 1;
     
     // Envio del identificador de capa 
-    
     
     while(SPI1STATbits.SPITBF);
     SPI1BUF = 0x01 << layer;
@@ -370,7 +305,7 @@ void setCube(void)
                     Z -> configuracion del eje Z
  * Valor devuelto: Ninguno */ 
 
- void putAxis(uint8_t dim, int8_t coord1, int8_t coord2, uint8_t config)
+ void putAxis(uint8_t dim, int8_t coord1, int8_t coord2, const uint8_t config)
 {
     uint8_t y,z;
     coord1 = mod(coord1);
@@ -402,7 +337,7 @@ void setCube(void)
                     Z -> vector de las configuraciones en el eje X con indice en Y
  * Valor devuelto: Ninguno */ 
 
-void putPlane(uint8_t dim, int8_t coord, uint8_t* config)
+void putPlane(uint8_t dim, int8_t coord, const uint8_t* config)
 {
     uint8_t y,z;
     coord = mod(coord);
@@ -462,7 +397,7 @@ uint8_t getAxis(uint8_t dim, int8_t coord1, int8_t coord2)
     return axis;
 }
 
-/* Nombre: putPlane
+/* Nombre: getPlane
  * Descripción: Funcion de obtencion de la configuracion actual de un plano perpendicular al eje (X,Y,Z) del cubo 
  * Argumentos:  dim - dimension del plano 
                     X -> X
@@ -482,28 +417,26 @@ uint8_t getAxis(uint8_t dim, int8_t coord1, int8_t coord2)
 
 uint8_t* getPlane(uint8_t dim, uint8_t coord)
 {
-    uint8_t* config;
+    static uint8_t config[N];
     uint8_t y,z;
     coord = mod(coord);
     if(dim == X)
     {   // Caso especial los config son Yrows
         for(z = 0 ; z < N ; z++)
-            *config++ = getAxis(Y,coord,z);
+            config[z] = getAxis(Y,coord,z);
     }
     else if(dim == Y)
     {   // Los config son Xrows
         for(z = 0 ; z < N ; z++)
-            *config++ = getAxis(X,coord,z);
+            config[z] = getAxis(X,coord,z);
     }
     else if(dim == Z)
     {   // Los config son Xrows
         for(y = 0 ; y < N ; y++)
-            *config++ = getAxis(X,y,coord);
+            config[y] = getAxis(X,y,coord);
     }
 
     return config;
 }
-
-
 
 

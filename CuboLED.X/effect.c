@@ -27,67 +27,31 @@ void drawCube(uint8_t edge,uint8_t x,uint8_t y,uint8_t z)
 }
 
 
-//5 Efecto lluvia
-// void rain(void)
-// {
-//     static int i;
-//     i--;
-//     if(i<=0)
-//         i=7;
+// 5 Efecto lluvia
+void rain(void)
+{
+    static uint8_t generate = true;
+    uint8_t y,z;
 
-//     if(i%2=1){
-//         for(j=0;j<=N; j++)
-//         {
-//             srand (time (NULL));
-//             leds=rand()%8;
-//             putAxis(X, j, i, leds);
-            
-//         }
-//         putPlane(Z,i-1,getPlane(Z,i));
-//     }
-// }
+    for(z = 0; z < N-1 ; z++)
+    {
+        putPlane(Z,z,getPlane(Z,z+1));
+    }
 
-//6 Cubo que cambia de tamaño y posicion
-        //Cubo tamaño n
-        // for(n=8;n<=3;n--){
-        //     for(i=0;i<=N;i++){
-        //         if(i==n || i==0)
-        //         {
-        //             for(j=0;j<=N;j++)
-        //             {
-        //                 if(j==0||j==n)
-        //                  putAxis(X,j,i,0xFF>>(n-1));
-        //                 else
-        //                     putAxis(X,j,i,(0x01||0x01<<(n-1)));
-        //             }
-        //         }else{
-        //             for(j==0||j==n)
-        //                 putAxis(X,j,i,(0x01||0x01<<(n-1)));
-        //         }
-        //     }      
-        // }
+    if(generate)
+    {
+        clearLayer(7);
+        for(y = 0; y < 2; y++)
+        {
+            setVoxel(rand()%8,rand()%8,N-1);
+        }
+        generate = false;
+    }
+    else
+        generate = true;
+}
 
-//7  Efecto anillos que se juntan
-// void ringMovement(void)
-// {
-//     int i,j,z;
-//     for(j=-4;j<=11;j++)
-//     {
-//         z=j;
-//         for(i=1;i<=4;i++)
-//         {
-//             z = j;
-//             if(j<=0)
-//             {
-//                 z=0;
-//             }else if(j>=7){
-//                 z=7;
-//             }
-//             ring(i,z);
-//             ring(i,7-z);
-//         }
-//     }
-// }
+
 
 /*
 //9 Pasar los LEDs de un lado al contrario de forma aleatoria
@@ -134,7 +98,7 @@ void ring(int l, int z)
 void setOblique(int d)
 {
     int i,j,k;
-    clearCube();
+
     for(i=0;i<8;i++)
     {
         for(j=0;j<8;j++)
@@ -175,4 +139,46 @@ void animateCube(int r)
     }
     clearCube();
     drawCube(i,x*(8-i),y*(8-i),z*(8-i));    
+}
+
+
+void expandCube(void){
+    static int size = 0;
+    static char growing = true;
+    uint8_t corner = 0; 
+    if(growing ){
+        size +=2;
+        if(size > 8)
+        {
+            size = 8;
+            growing = false;
+        }
+        
+    }else if(!growing){
+        size -=2;
+        if(size < 2){
+            size = 2;
+            growing = true;
+        }
+            
+    }
+    corner = 4-size/2;
+    drawCube(size,corner,corner,corner);
+}
+
+void randomFill(void)
+{
+    static int i = 0;
+    uint8_t x,y,z;
+    
+    while(i<512){
+        x = mod(rand());
+        y = mod(rand());
+        z = mod(rand());
+        if(!voxel(x,y,z)){
+            setVoxel(x,y,z);
+           i++;
+        }
+    }
+
 }

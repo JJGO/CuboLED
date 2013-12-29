@@ -8,15 +8,12 @@
 //Librerias utilizadas 
 #include "driver.h"
 #include "stdint.h"			// para el uso de int8_t
-#include "effect.h"
-//#include "font8x8_basic.h"
-
 
 // Macros para utilizar máscaras de forma cómoda
 #define setV(a,b,c)   	(voxel[c][b] |= (0x01) << a)
 #define clearV(a,b,c)   (voxel[c][b] &= ~((0x01) << a))
 #define toggleV(a,b,c)	(voxel[c][b] = (0x01) << a)
-#define putV(a,b,c,p)		(voxel[c][b] ^= (p<<a))
+#define putV(a,b,c,p)	(voxel[c][b] ^= (p<<a))
 #define voxel(a,b,c) 	((voxel[c][b] >> a) & 0x01)
 
 
@@ -26,8 +23,7 @@
 #define mod(a) (a & 0x07)
 
 #define TREFRESH 	20		//periodo de refresco de las capas en decimas de milisegundo
-#define TSCLK		2		//periodo del reloj serie en microsegundos
-#define TCLEAR		2		//en microsegundos (con 2 funciona pero shading)
+#define TCLEAR		2		//en microsegundos 
 
 
 #define _SDI	PORTBbits.RB11		
@@ -67,14 +63,14 @@ void 		setLayer	(int8_t z);
 void 		clearCube	(void);
 void 		setCube		(void);
 void 		Refresh		(void);
-void 		putAxis		(uint8_t dim, int8_t  coord1, int8_t   coord2, uint8_t config);
-void 		putPlane	(uint8_t dim, int8_t  coord,  uint8_t* config);
+void 		putAxis		(uint8_t dim, int8_t  coord1, int8_t   coord2, const uint8_t config);
+void 		putPlane	(uint8_t dim, int8_t  coord,  const uint8_t* config);
 uint8_t		getAxis		(uint8_t dim, int8_t  coord1, int8_t   coord2);
 uint8_t* 	getPlane	(uint8_t dim, uint8_t coord);
 
-void setOblique(int d);
-void drawCube(uint8_t edge,uint8_t x,uint8_t y,uint8_t z);
-void ring(int l, int z);
-void animateCube(int);
+// void drawCube(uint8_t,uint8_t,uint8_t ,uint8_t);
+// void ring(int l, int z);
+// void setOblique(int d);
+// void animateCube(int r);
 
 #endif
