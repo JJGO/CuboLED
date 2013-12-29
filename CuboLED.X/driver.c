@@ -26,7 +26,7 @@ static unsigned int periodoVT1 = 2000;
 static unsigned int ticksVT2 = 0;
 static unsigned int periodoVT2 = 7919;
 
-static int effect = 6;
+static int effect = 2;
 static int Neffect = 7;
 
 /* Nombre: initTimer1
@@ -124,43 +124,13 @@ void delay_us(int us){
 
 void vTimer1(void){
     
-    static int i = 0, j = 0, z=0;
+    static int i = 0, j = 0;
     const static uint8_t sin[32] = {1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 2, 2, 2, 1, 1, 0, -1, -1, -2, -2, -2, -3, -3, -3, -3, -3, -2, -2, -2, -1, -1};
     //const static uint8_t sin[32] = {4, 5, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 6, 5, 5, 4, 3, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 3};
-    const static uint8_t J[8] = {0x00, 0x1E, 0x33, 0x33, 0x30, 0x30,0x30 ,  0x78};
-    const static uint8_t ASCII[26][8]={
-    {0x00, 0xCC, 0xCC, 0xFC, 0xCC, 0xCC, 0x78, 0x30},  // U+0041 (A)
-    {0x00, 0xFC, 0x66, 0x66, 0x7C, 0x66, 0x66, 0xFC},  // U+0042 (B)
-    {0x00, 0x3C, 0x66, 0xC0, 0xC0, 0xC0, 0x66, 0x3C},  // U+0043 (C)
-    {0x00, 0xF8, 0x6C, 0x66, 0x66, 0x66, 0x6C, 0xF8},  // U+0044 (D)
-    {0x00, 0xFE, 0x62, 0x68, 0x78, 0x68, 0x62, 0xFE},  // U+0045 (E)
-    {0x00, 0xF0, 0x60, 0x68, 0x78, 0x68, 0x62, 0xFE},  // U+0046 (F)
-    {0x00, 0x3E, 0x66, 0xCE, 0xC0, 0xC0, 0x66, 0x3C},  // U+0047 (G)
-    {0x00, 0xCC, 0xCC, 0xCC, 0xFC, 0xCC, 0xCC, 0xCC},  // U+0048 (H)
-    {0x00, 0x78, 0x30, 0x30, 0x30, 0x30, 0x30, 0x78},  // U+0049 (I)
-    {0x00, 0x78, 0xCC, 0xCC, 0x0C, 0x0C, 0x0C, 0x1E},  // U+004A (J)
-    {0x00, 0xE6, 0x66, 0x6C, 0x78, 0x6C, 0x66, 0xE6},  // U+004B (K)
-    {0x00, 0xFE, 0x66, 0x62, 0x60, 0x60, 0x60, 0xF0},  // U+004C (L)
-    {0x00, 0xC6, 0xC6, 0xD6, 0xFE, 0xFE, 0xEE, 0xC6},  // U+004D (M)
-    {0x00, 0xC6, 0xC6, 0xCE, 0xDE, 0xF6, 0xE6, 0xC6},  // U+004E (N)
-    {0x00, 0x38, 0x6C, 0xC6, 0xC6, 0xC6, 0x6C, 0x38},  // U+004F (O)
-    {0x00, 0xF0, 0x60, 0x60, 0x7C, 0x66, 0x66, 0xFC},  // U+0050 (P)
-    {0x00, 0x1C, 0x78, 0xDC, 0xCC, 0xCC, 0xCC, 0x78},  // U+0051 (Q)
-    {0x00, 0xE6, 0x66, 0x6C, 0x7C, 0x66, 0x66, 0xFC},  // U+0052 (R)
-    {0x00, 0x78, 0xCC, 0x1C, 0x70, 0xE0, 0xCC, 0x78},  // U+0053 (S)
-    {0x00, 0x78, 0x30, 0x30, 0x30, 0x30, 0xB4, 0xFC},  // U+0054 (T)
-    {0x00, 0xFC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC},  // U+0055 (U)
-    {0x00, 0x30, 0x78, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC},  // U+0056 (V)
-    {0x00, 0xC6, 0xEE, 0xFE, 0xD6, 0xC6, 0xC6, 0xC6},  // U+0057 (W)
-    {0x00, 0xC6, 0x6C, 0x38, 0x38, 0x6C, 0xC6, 0xC6},  // U+0058 (X)
-    {0x00, 0x78, 0x30, 0x30, 0x78, 0xCC, 0xCC, 0xCC},  // U+0059 (Y)
-    {0x00, 0xFE, 0x66, 0x32, 0x18, 0x8C, 0xC6, 0xFE},  // U+005A (Z)
-    
-    };
 
-    const static unsigned char mensaje[12] = {"JOSE JAVIER"};
+    static  char mensaje[13] = {"Hello World "};
     static unsigned int lenMensaje = 12;
-
+    uint8_t* config;
 
     ticksVT1++;
     periodoVT1 = 2*get_ad(5)+100;
@@ -171,65 +141,45 @@ void vTimer1(void){
         {  
 //1         
             case 1:
-                clearCube();
-
-                j++;
-                if(j >= 12)
-                    j=0;
-                z=j;
-                for(i=1;i<=4;i++)
-                {
-                    z = j-(i-1);
-                    if(z<0)
-                    {
-                        z=0;
-                    }else if(z>7){
-                        z=7;
-                    }
-                    ring(i,z);
-                    ring(i,7-z);
-                }
+                animate_ring(false);
                 
                 break;  
 //2             
             case 2:
                 clearCube();
                 i++;
-                if(i>=8)
+                if(i>=5800)
                 {
                     i = 0;
-                    j++;
-                    if(j >= lenMensaje)
-                        j=0;
-
                 }
-                putPlane(X,7-i,ASCII[mensaje[j]-'A']);
-                if(mensaje[j]==' ' || mensaje[j] == 0)
-                    clearCube();
+                //putPlane(X,7-i,ASCII[mensaje[j]-'A']);
+                // if(mensaje[j]==' ' || mensaje[j] == 0)
+                    // clearCube();
+                //
+                //effect_broadway_message(mensaje,true);
+                //putPlane(X,3,greek[i/100]);
+                putAscii(Y,0,'J');
                 break;
                 
 //3
             case 3:
-                j++;
-                if(j >= 32)
-                    j=0;
-                //putAxis(Y,0,0,0x00);
-                //setVoxel(0,sin[j]+4,0);
-                //putAxis(X,0,0,0x00);
-                //setVoxel(sin[(j+8)&0x1F]+4,0,0);
-                //clearLayer(0);
-                clearCube();
-                // setVoxel(sin[(j+8)&0x1F]+3,sin[j]+3,0);
-                // setVoxel(sin[j]+3,sin[(j+8)&0x1F]+3,1);
-                for(i=0;i<N;i++){
-                    //setVoxel(sin[(j+i)&0x1F]+3,i,0);
-                    setVoxel(sin[(j+i+8)&0x1F]+3,sin[(j+i)&0x1F]+3,1);
-                }
+                // j++;
+                // if(j >= 32)
+                //     j=0;
+                // clearCube();
+                // for(i=0;i<N;i++){
+                //     //setVoxel(sin[(j+i)&0x1F]+3,i,0);
+                //     setVoxel(sin[(j+i+8)&0x1F]+3,sin[(j+i)&0x1F]+3,1);
+                // }
+
+                effect_push_message(mensaje,X,6,false);
+                //effect_slide_message(mensaje,false);
+                //effect_broadway_message(mensaje,false);
                 break;
 
             case 4: 
                 
-                animateCube(ticksVT2);
+                animate_cube(false);
                 break;
 
             case 5:
@@ -246,7 +196,7 @@ void vTimer1(void){
                 // i++;
                 // if(i >= N)
                 //     i = 0;
-                rain();
+                rain(false);
                 break;
             case 7:
                 i++;
@@ -254,7 +204,7 @@ void vTimer1(void){
                     i = 0;
                     clearCube();
                 }
-                setOblique(i);
+                set_oblique(i);
                 break;
 
             default:

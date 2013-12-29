@@ -21,6 +21,7 @@
 #define N 8
 //#define mod(a) (a < 0 ? a%N+N : a%N)
 #define mod(a) (a & 0x07)
+#define inrange(a)  (a == mod(a))
 
 #define TREFRESH 	20		//periodo de refresco de las capas en decimas de milisegundo
 #define TCLEAR		2		//en microsegundos 
@@ -63,14 +64,12 @@ void 		setLayer	(int8_t z);
 void 		clearCube	(void);
 void 		setCube		(void);
 void 		Refresh		(void);
-void 		putAxis		(uint8_t dim, int8_t  coord1, int8_t   coord2, const uint8_t config);
-void 		putPlane	(uint8_t dim, int8_t  coord,  const uint8_t* config);
+void 		putAxis		(uint8_t dim, int8_t  coord1, int8_t   coord2, uint8_t config);
+void 		putPlane	(uint8_t dim, int8_t  coord,  uint8_t* config);
 uint8_t		getAxis		(uint8_t dim, int8_t  coord1, int8_t   coord2);
 uint8_t* 	getPlane	(uint8_t dim, uint8_t coord);
 
-// void drawCube(uint8_t,uint8_t,uint8_t ,uint8_t);
-// void ring(int l, int z);
-// void setOblique(int d);
-// void animateCube(int r);
+void shiftCube(uint8_t dim,uint8_t dir, uint8_t closed);
+void fillPlane(uint8_t dim, uint8_t coord, uint8_t config);
 
 #endif

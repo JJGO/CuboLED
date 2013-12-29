@@ -11,6 +11,7 @@
 #include "uart.h"			// Libreria para el manejo del modulo serie
 #include "cubo.h"
 #include "effect.h"
+#include "font.h"
 
 // Macros para utilizar máscaras de forma cómoda
 #define clear(file,b)   (file &= ~((0x0001) << b))

@@ -20,8 +20,8 @@ void clearLayer(int8_t z);
 void setLayer(int8_t z);
 void clearCube(void);
 void setCube(void);
-void putAxis(uint8_t dim, int8_t coord1, int8_t coord2, const uint8_t config);
-void putPlane(uint8_t dim, int8_t coord, const uint8_t* config);
+void putAxis(uint8_t dim, int8_t coord1, int8_t coord2, uint8_t config);
+void putPlane(uint8_t dim, int8_t coord, uint8_t* config);
 uint8_t getAxis(uint8_t dim, int8_t coord1, int8_t coord2);
 uint8_t* getPlane(uint8_t dim, uint8_t coord);
 
@@ -305,7 +305,7 @@ void setCube(void)
                     Z -> configuracion del eje Z
  * Valor devuelto: Ninguno */ 
 
- void putAxis(uint8_t dim, int8_t coord1, int8_t coord2, const uint8_t config)
+ void putAxis(uint8_t dim, int8_t coord1, int8_t coord2, uint8_t config)
 {
     uint8_t y,z;
     coord1 = mod(coord1);
@@ -337,7 +337,7 @@ void setCube(void)
                     Z -> vector de las configuraciones en el eje X con indice en Y
  * Valor devuelto: Ninguno */ 
 
-void putPlane(uint8_t dim, int8_t coord, const uint8_t* config)
+void putPlane(uint8_t dim, int8_t coord, uint8_t* config)
 {
     uint8_t y,z;
     coord = mod(coord);
@@ -438,5 +438,77 @@ uint8_t* getPlane(uint8_t dim, uint8_t coord)
 
     return config;
 }
+
+void fillPlane(uint8_t dim, uint8_t coord, uint8_t config)
+{
+    uint8_t y,z;
+    coord = mod(coord);
+    if(dim == X)
+    {   // Caso especial los config son Yrows
+        for(z = 0 ; z < N ; z++)
+            putAxis(Y,coord,z,config);
+    }
+    else if(dim == Y)
+    {   // Los config son Xrows
+        for(z = 0 ; z < N ; z++)
+            putAxis(X,coord,z,config);
+    }
+    else if(dim == Z)
+    {   // Los config son Xrows
+        for(y = 0 ; y < N ; y++)
+            putAxis(X,y,coord,config);
+    }
+}
+
+
+/* Nombre: shiftCube
+ * Descripción: Funcion para desplazar el contenido del cupo
+ * Argumentos:  dim - dimension de la rotacion (X,Y,Z)
+                dir - indica la direccion (0 IZQUIERDA, 1 DERECHA)
+                closed - indica si se considera un cubo cerrado
+ * Valor devuelto: Ninguno */ 
+
+void shiftCube(uint8_t dim,uint8_t dir, uint8_t closed)
+{
+    uint8_t i = 0;
+    uint8_t buffer[8],*config;
+    
+    if(dir == 0){ 
+        config = getPlane(dim,N-1);
+        for(i = 0; i < N ; i++)
+        {
+            buffer[i] = config[i];
+        }
+        
+        for(i = N-2; i < N ; i--){
+           putPlane(dim,i+1,getPlane(dim,i));
+        }
+        if(closed)
+        {
+            putPlane(dim,0,buffer);
+        }else{
+            fillPlane(dim,0,0x00);
+        }
+        
+    }else{
+        config = getPlane(dim,N);
+        for(i = 0; i < N ; i++)
+        {
+            buffer[i] = config[i];
+        }
+        for(i = 0; i < N-1 ; i++){
+           putPlane(dim,i,getPlane(dim,i+1));
+        }
+        if(closed)
+        {
+            putPlane(dim,N-1,buffer); 
+        }else{
+            fillPlane(dim,N-1,0x00);
+        }
+        
+    }
+
+}
+
 
 
