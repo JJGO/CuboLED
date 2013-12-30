@@ -44,6 +44,8 @@ void cubeInit(void)
     SPIinit();
     clearCube();
     InicializarUART();
+    initEffects();
+    effect_quit();
 }
 
 /* Nombre: SPI_PinRemap
@@ -510,8 +512,6 @@ void shiftCube(uint8_t dim,uint8_t dir, uint8_t closed)
         if(closed)
         {
             putPlane(dim,0,buffer);
-        }else{
-            fillPlane(dim,0,0x00);
         }
         
     }else{
@@ -526,8 +526,6 @@ void shiftCube(uint8_t dim,uint8_t dir, uint8_t closed)
         if(closed)
         {
             putPlane(dim,N-1,buffer); 
-        }else{
-            fillPlane(dim,N-1,0x00);
         }
         
     }

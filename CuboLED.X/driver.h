@@ -38,11 +38,8 @@ void mainInit(void);
 void setDigitalPorts(void);
 
 void initTimer1(void);
-void delay(int);
-void delay_us(int);
 
 void vTimer1(void);
-void vTimer2(void);
 
 void PWM1(void);
 

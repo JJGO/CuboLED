@@ -2,38 +2,51 @@
 #include "effect.h"
 
 
-void* current_effect;
-
+peffect   current_effect;
+static uint16_t counter = 0;
+static uint16_t ticks_effect = 0;
+static uint16_t periodo_effect = 1000; //Periodo entre llamadas al efecto en milisegundos
+static uint8_t analog_period = true;
+static uint8_t analog_factor = 2;
 // ----------------------------------- PROTOTIPOS -----------------------------------------
 
-void effect_launcher(void);
-void effect_animate(void*);
-void effect_repeat(void*,uint8_t);
+void        effect_launch               (peffect effect);
+void        effect_repeat               (peffect effect, uint8_t iterations);
+void        effect_quit                 (void);
+void        effect_empty(uint8_t a);
+void        effect_launcher             (void);
+uint16_t    getPeriodo                  (void);
+void        setFactor                   (uint8_t factor);
 
-void draw_cube(uint8_t edge,uint8_t x,uint8_t y,uint8_t z);
-void effect_animate_cube(uint8_t reset);
-void effect_expand_cube(uint8_t reset);
-void effect_rain(uint8_t reset);
-void ring(int l, int z);
-void effect_crossing_piramids(uint8_t reset);
-void set_oblique(int d);
-void effect_spin(uint8_t* config);
-void random_fill(void);
+void        draw_cube                   (uint8_t edge,uint8_t x,uint8_t y,uint8_t z);
+void        ring                        (int l, int z);
+void        set_oblique                 (int d);
+    
+void        effect_animate_cube         (uint8_t reset);
+void        effect_expand_cube          (uint8_t reset);
+void        effect_rain                 (uint8_t reset);
+void        effect_crossing_piramids    (uint8_t reset);
+void        effect_spin                 (uint8_t* config);
+void        random_fill                 (void);
 
 // ----------------------------------- FUNCIONES ------------------------------------------
 
-void effect_launch(void* effect)
+void effect_launch(peffect effect)
 {
-    *effect(true);      // resetea el efecto
+    analog_period = true;
+    analog_factor = 2;
+    (*effect)(true);      // resetea el efecto
     current_effect = effect;
-    period = -1;
+    counter = -1;
 }
 
-void effect_animate(void* effect, uint8_t iterations)
+void effect_repeat(peffect effect, uint8_t iterations)
 {
-    *effect(true);
+    analog_period = true;
+    analog_factor = 2;
+    (*effect)(true);
     current_effect = effect;
-    period = iterations;
+    counter = iterations;
     
 }
 
@@ -43,11 +56,37 @@ void effect_quit(void)
     current_effect = &effect_empty;
 }
 
-void effect_empty(void){
+void effect_empty(uint8_t a)
+{
     
 }
 
+void effect_launcher(void)
+{
+    ticks_effect++;
+    if(analog_period)
+        periodo_effect = analog_factor*get_ad(5)+100; // si esta habilitado por el efecto el periodo es variable 
+    if(ticks_effect >= periodo_effect)
+    {
+        ticks_effect = 0;
+        (*current_effect)(false);
+        if(counter > 0){
+            counter--;
+        }else if(counter == 0){
+            effect_quit();
+        }
+    }
+}
 
+uint16_t getPeriodo(void)
+{
+    return periodo_effect;
+}
+
+void setFactor(uint8_t factor)
+{
+    analog_factor = factor;
+}
 
 /*Nombre: draw_cube
  * Descripcion: Dibuja un cubo de lado edge con la esquina inferior izquierda de coordenadas x,y,z
@@ -177,10 +216,7 @@ void effect_rain(uint8_t reset)
         return;
     }
 
-    for(z = 0; z < N-1 ; z++)
-    {
-        putPlane(Z,z,getPlane(Z,z+1));
-    }
+    shiftCube(Z,true,false);
 
     if(generate)
     {

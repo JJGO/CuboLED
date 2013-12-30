@@ -23,9 +23,6 @@ int  get_ad(int canal);
 static unsigned int ticksVT1 = 0;
 static unsigned int periodoVT1 = 2000;
 
-static unsigned int ticksVT2 = 0;
-static unsigned int periodoVT2 = 7919;
-
 static int effect = 2;
 static int Neffect = 7;
 
@@ -76,46 +73,6 @@ void initTimer1(void){
     T1CON = 0x8000;                                 // arranca con pres = 1
 }
 
-/* Nombre: delay
- * Descripción: Función de espera en modo bloqueado
- * Argumentos: int ms -> la cantidad de milisegundos a esperar
- * Valor devuelto: Ninguno */ 
-
-void delay(int ms){
-    int i;
-    TMR1=0; 
-    PR1= MS; 
-    T1CON=0x8000; 
-    IFS0bits.T1IF=0;    //clear(IFS0,3)
-
-    for(i = 0 ; i < ms ; i++)
-    {
-        while(IFS0bits.T1IF == 0); 
-        IFS0bits.T1IF = 0;
-    }
-}
-
-/* Nombre: delay
- * Descripción: Función de espera en modo bloqueado
- * Argumentos: int ms -> la cantidad de milisegundos a esperar
- * Valor devuelto: Ninguno */ 
-
-void delay_us(int us){
-    int i;
-    TMR1=0; 
-    PR1= US; 
-    T1CON=0x8000; 
-    IFS0bits.T1IF=0;    //clear(IFS0,3)
-
-    for(i = 0 ; i < us ; i++)
-    {
-        while(IFS0bits.T1IF == 0); 
-        IFS0bits.T1IF = 0;
-    }
-}
-
-
-
 /* Nombre: VTimer1 
  * Descripción: Función de atencion al timer virtual 1 
  * Argumentos: Ninguno
@@ -123,8 +80,8 @@ void delay_us(int us){
 
 void vTimer1(void){
     
-    static int i = 0, j = 0;
-    const static uint8_t sin[32] = {1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 2, 2, 2, 1, 1, 0, -1, -1, -2, -2, -2, -3, -3, -3, -3, -3, -2, -2, -2, -1, -1};
+    static int i = 0;//, j = 0;
+   // const static uint8_t sin[32] = {1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 2, 2, 2, 1, 1, 0, -1, -1, -2, -2, -2, -3, -3, -3, -3, -3, -2, -2, -2, -1, -1};
     //const static uint8_t sin[32] = {4, 5, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 6, 5, 5, 4, 3, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 3};
 
     static  char mensaje[13] = {"THE GAME "};
@@ -158,7 +115,7 @@ void vTimer1(void){
                 //putAscii(X,0,'J');
                 // putAscii(Y,0,'J');
                 // putAscii(Z,7,'J');
-                putFont(Z,0,hiragana[2]);
+                //putFont(Z,0,hiragana[2]);
                 break;
                 
 //3
@@ -204,7 +161,7 @@ void vTimer1(void){
                     i = 0;
                     clearCube();
                 }
-                set_oblique(i);
+                //set_oblique(i);
                 break;
 
             default:
@@ -221,19 +178,6 @@ void vTimer1(void){
 
 }
 
-/* Nombre: VTimer2 
- * Descripción: Función de atencion al timer virtual 2 
- * Argumentos: Ninguno
- * Valor devuelto: Ninguno */ 
-
-void vTimer2(void){
-    ticksVT2++;
-    if(ticksVT2 >= periodoVT2){
-        ticksVT2 = 0;
-        //Accion del vTimer2
-    }
-
-}
 
 /* Nombre: PWM1 
  * Descripción: Función de atencion al Pulse Width Modulator 1 
@@ -297,15 +241,18 @@ char watch_uart(void){
     static int mensaje;
     static int i = 0;
     static char buffer[64];
-
     if (HayAlgoRecibido()) {
         mensaje = SacarDeColaRecepcionUART();
             //Operar Mensaje
         PonerEnColaTransmisionUART(mensaje);        //Realiza el eco de lo recibido
         Transmite();
-        if(mensaje == '\n')
+        if(mensaje == '\r')
         {
+            PonerEnColaTransmisionUART('\n');
+            Transmite();
+            toggleVoxel(2,2,2);
             buffer[i] = '\0';
+            i = 0;
             parse_message(buffer);
         }else{
             buffer[i++] = mensaje;
@@ -345,15 +292,16 @@ int get_ad(int canal){
 
 void __attribute__((interrupt,no_auto_psv)) _T1Interrupt(void) {
     IFS0bits.T1IF=0; //limpieza del flag
-    
+    toggleVoxel(1,1,1);
     Refresh();
 
     effect_launcher();
     //vTimer1();
-    //vTimer2();
 
     //PWM1();
 
     EdgeDetect(SWITCH);
+    watch_uart();
+    
 
  }

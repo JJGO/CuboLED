@@ -7,19 +7,21 @@
 
 //Librerias utilizadas
 #include <stdint.h>     // Para el uso de uint8_t
+#include <stdlib.h>     // Para atoi
 #include "cubo.h"
 #include "effect.h"
 
 
-
 #define EFFECTS_ID  'E'
+#define EFFECTS_NUM  30
 #define GAMES_ID    'G'
 
-const static uint8_t
 
 
-
-void parse_message(void);
+void parse_message(char* code);
+void send_periodo(void);
+void parse_effect(char* code);
+void initEffects(void);
 
 
 #endif

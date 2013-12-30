@@ -36,6 +36,7 @@ _FICD(ICS_PGD1 & JTAGEN_OFF);
 int main(void){
     mainInit();
     cubeInit();
+    effect_launch(&effect_rain);
     while(1);
 
      

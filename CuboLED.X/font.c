@@ -69,21 +69,7 @@ void putFont(uint8_t dim,  uint8_t coord, uint8_t* character)
 
 void putAscii(uint8_t dim, uint8_t coord, char c)
 {
-    putFont(dim,coord,ascii[c]);
-    // uint8_t y,z;
-    // if(dim == Y || dim == Z){   
-    //     putPlane(dim,coord,ascii[c]);
-    // }
-    // else if(dim == X)
-    // {
-    //     for(z = 0; z < N; z++)
-    //     {
-    //         for(y = 0; y < N; y++)
-    //         {
-    //             putVoxel(coord,y,z,test(ascii[c][z],N-1-y));
-    //         }
-    //     }
-    // }
+    putFont(dim,coord,ascii[c+0x20]);
 }
 
 /* Nombre: effect_push_message
@@ -98,7 +84,6 @@ void putAscii(uint8_t dim, uint8_t coord, char c)
 void effect_push_message(char* message,uint8_t dim, uint8_t space,uint8_t reset)
 {
     static uint8_t i = 0,c=0;
-    uint8_t j;
 
     if(reset)
     {
@@ -108,8 +93,10 @@ void effect_push_message(char* message,uint8_t dim, uint8_t space,uint8_t reset)
     
     if(dim != Z){
         shiftCube(dim,true,false);
+        fillPlane(dim,7,0x00);
     }else{
         shiftCube(dim,false,false);
+        fillPlane(dim,0,0x00);
     }
     
     i++;
@@ -176,7 +163,7 @@ void effect_broadway_message(char* message,uint8_t reset)
             letter = 0;
     }
 
-    buffer[0] = getColumnFont(ascii[message[letter]],count++);
+    buffer[0] = getColumnFont(ascii[message[(int)letter]],count++);
 
     //COPY TO CUBE
     // Cara X=0
@@ -232,7 +219,7 @@ void effect_slide_message(char* message, uint8_t reset)
             letter = 0;
     }
 
-    buffer[0] = getColumnFont(ascii[message[letter]],count++);
+    buffer[0] = getColumnFont(ascii[message[(int)letter]],count++);
 
     //COPY TO CUBE
     for(i = 0; i < N ; i++)
