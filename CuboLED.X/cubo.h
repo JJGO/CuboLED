@@ -9,6 +9,10 @@
 #include "driver.h"
 #include "stdint.h"			// para el uso de int8_t
 
+//Librerias externas para el uso del cubo
+#include "effect.h"
+#include "parser.h"
+
 // Macros para utilizar máscaras de forma cómoda
 #define setV(a,b,c)   	(voxel[c][b] |= (0x01) << a)
 #define clearV(a,b,c)   (voxel[c][b] &= ~((0x01) << a))

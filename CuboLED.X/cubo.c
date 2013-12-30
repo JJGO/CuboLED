@@ -43,6 +43,7 @@ void cubeInit(void)
 {
     SPIinit();
     clearCube();
+    InicializarUART();
 }
 
 /* Nombre: SPI_PinRemap

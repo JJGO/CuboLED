@@ -13,9 +13,9 @@ void vTimer1(void);
 void vTimer2(void);
 void PWM1(void);
 void EdgeDetect(int signal);
-char watchUART(void);
-void init_ad(int canales );
-int get_ad(int canal);
+char watch_uart(void);
+void init_ad(int canales);
+int  get_ad(int canal);
 
 // ----------------------------------- FUNCIONES -----------------------------------------
 
@@ -46,7 +46,6 @@ void mainInit(void){
     PORTA = 0x0000;
 
     initTimer1();
-    InicializarUART();
 
     init_ad(0x20);
 
@@ -289,21 +288,35 @@ void EdgeDetect(int signal){
     }
 }
 
-/* Nombre: watchUART 
+/* Nombre: watch_uart 
  * Descripción: Función de atencion al modulo UART
  * Argumentos: Ninguno
- * Valor devuelto: Ninguno */ 
+ * Valor devuelto: mensaje */ 
 
-char watchUART(void){
+char watch_uart(void){
     static int mensaje;
+    static int i = 0;
+    static char buffer[64];
+
     if (HayAlgoRecibido()) {
         mensaje = SacarDeColaRecepcionUART();
             //Operar Mensaje
         PonerEnColaTransmisionUART(mensaje);        //Realiza el eco de lo recibido
         Transmite();
+        if(mensaje == '\n')
+        {
+            buffer[i] = '\0';
+            parse_message(buffer);
+        }else{
+            buffer[i++] = mensaje;
+            if(i>64)
+                i = 0;
+        }
     }
     return mensaje;
 }
+
+
 
 void init_ad(int canales ){
 
@@ -334,15 +347,13 @@ void __attribute__((interrupt,no_auto_psv)) _T1Interrupt(void) {
     IFS0bits.T1IF=0; //limpieza del flag
     
     Refresh();
-    vTimer1();
-    
-    vTimer2();
+
+    effect_launcher();
+    //vTimer1();
+    //vTimer2();
 
     //PWM1();
 
     EdgeDetect(SWITCH);
-
-    // watchUART();
-
 
  }

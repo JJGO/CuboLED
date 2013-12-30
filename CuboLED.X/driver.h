@@ -9,9 +9,8 @@
 #include "p33FJ32MC202.h"	// Libreria de Microchip para poder utilizar la sintaxis C
 #include "config.h"			// Fichero de configuracion para incializar el reloj y remapear los perifericos
 #include "uart.h"			// Libreria para el manejo del modulo serie
+
 #include "cubo.h"
-#include "effect.h"
-#include "font.h"
 
 // Macros para utilizar máscaras de forma cómoda
 #define clear(file,b)   (file &= ~((0x0001) << b))
@@ -48,7 +47,6 @@ void vTimer2(void);
 void PWM1(void);
 
 void EdgeDetect(int);
-
-char watchUART(void);
+char watch_uart(void);
 
 #endif

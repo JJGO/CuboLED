@@ -2,6 +2,8 @@
 // Libreria para el control de ejecucion de efectos en el cubo mediante el modulo UART
 // parser.c
 
+#include "parser.h"
+
 // ----------------------------------- PROTOTIPOS -----------------------------------------
 
 
@@ -11,3 +13,4 @@ void parser(void)
 {
     
 }
+

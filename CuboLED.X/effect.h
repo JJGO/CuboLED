@@ -8,6 +8,7 @@
 #include <math.h>
 
 //Librerias extrnas de efectos
+#include "font.h"
 
 void effect_launcher(void);
 void effect_animate(void*);

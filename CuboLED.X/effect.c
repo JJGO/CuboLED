@@ -1,6 +1,9 @@
 
 #include "effect.h"
 
+
+void* current_effect;
+
 // ----------------------------------- PROTOTIPOS -----------------------------------------
 
 void effect_launcher(void);
@@ -18,6 +21,33 @@ void effect_spin(uint8_t* config);
 void random_fill(void);
 
 // ----------------------------------- FUNCIONES ------------------------------------------
+
+void effect_launch(void* effect)
+{
+    *effect(true);      // resetea el efecto
+    current_effect = effect;
+    period = -1;
+}
+
+void effect_animate(void* effect, uint8_t iterations)
+{
+    *effect(true);
+    current_effect = effect;
+    period = iterations;
+    
+}
+
+void effect_quit(void)
+{
+    clearCube();
+    current_effect = &effect_empty;
+}
+
+void effect_empty(void){
+    
+}
+
+
 
 /*Nombre: draw_cube
  * Descripcion: Dibuja un cubo de lado edge con la esquina inferior izquierda de coordenadas x,y,z
@@ -287,5 +317,6 @@ void random_fill(void)
     }
 
 }
+
 
 
