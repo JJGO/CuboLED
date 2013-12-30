@@ -19,9 +19,18 @@
 
 // Macros para la defincion de constantes
 #define N 8
-//#define mod(a) (a < 0 ? a%N+N : a%N)
+
+
+#ifdef _MOD
 #define mod(a) (a & 0x07)
-#define inrange(a)  (a == mod(a))
+#endif
+
+#ifndef _MOD
+#define mod(a) (a)
+#endif
+
+
+#define inrange(a)  (a == a & 0x07)
 
 #define TREFRESH 	20		//periodo de refresco de las capas en decimas de milisegundo
 #define TCLEAR		2		//en microsegundos 
@@ -47,8 +56,8 @@
 // };
 
 
-// Variables globales
 
+// Variables globales
 static uint8_t voxel[N][N];
 
 // Prototipos de las funciones publicas
@@ -69,7 +78,7 @@ void 		putPlane	(uint8_t dim, int8_t  coord,  uint8_t* config);
 uint8_t		getAxis		(uint8_t dim, int8_t  coord1, int8_t   coord2);
 uint8_t* 	getPlane	(uint8_t dim, uint8_t coord);
 
-void shiftCube(uint8_t dim,uint8_t dir, uint8_t closed);
-void fillPlane(uint8_t dim, uint8_t coord, uint8_t config);
+void        shiftCube   (uint8_t dim, uint8_t dir,    uint8_t closed);
+void        fillPlane   (uint8_t dim, uint8_t coord,  uint8_t config);
 
 #endif

@@ -4,26 +4,33 @@
 
 #include "cubo.h"
 
+
 // ----------------------------------- PROTOTIPOS -----------------------------------------
 
-void cubeInit(void);
-void SPI_PinRemap(void);
-void SPIinit(void);
-void Refresh(void);
-void loadLayer(uint8_t layer);
-void setVoxel(int8_t x,int8_t y,int8_t z);
-void clearVoxel(int8_t x,int8_t y,int8_t z);
-void toggleVoxel(int8_t x,int8_t y,int8_t z);
-void putVoxel(int8_t x,int8_t y,int8_t z,uint8_t b);
-uint8_t getVoxel(int8_t x,int8_t y,int8_t z);
-void clearLayer(int8_t z);
-void setLayer(int8_t z);
-void clearCube(void);
-void setCube(void);
-void putAxis(uint8_t dim, int8_t coord1, int8_t coord2, uint8_t config);
-void putPlane(uint8_t dim, int8_t coord, uint8_t* config);
-uint8_t getAxis(uint8_t dim, int8_t coord1, int8_t coord2);
-uint8_t* getPlane(uint8_t dim, uint8_t coord);
+void        cubeInit        (void);
+void        SPI_PinRemap    (void);
+void        SPIinit         (void);
+void        Refresh         (void);
+void        loadLayer       (uint8_t layer);
+
+void        setVoxel        (int8_t x,  int8_t y,   int8_t z);
+void        clearVoxel      (int8_t x,  int8_t y,   int8_t z);
+void        toggleVoxel     (int8_t x,  int8_t y,   int8_t z);
+void        putVoxel        (int8_t x,  int8_t y,   int8_t z,   uint8_t b);
+uint8_t     getVoxel        (int8_t x,  int8_t y,   int8_t z);
+
+void        clearLayer      (int8_t z);
+void        setLayer        (int8_t z);
+void        clearCube       (void);
+void        setCube         (void);
+void        putAxis         (uint8_t dim, int8_t  coord1, int8_t   coord2, uint8_t config);
+void        putPlane        (uint8_t dim, int8_t  coord,  uint8_t* config);
+uint8_t     getAxis         (uint8_t dim, int8_t  coord1, int8_t   coord2);
+uint8_t*    getPlane        (uint8_t dim, uint8_t coord);
+void        fillPlane       (uint8_t dim, uint8_t coord,  uint8_t  config);
+void        shiftCube       (uint8_t dim, uint8_t dir,    uint8_t  closed);
+
+
 
 // ----------------------------------- FUNCIONES -----------------------------------------
 
@@ -130,9 +137,11 @@ void Refresh(void)
     {
         ticks = 0;
         // Se incrementa esta capa
-        layer = mod(layer);
+        layer &= 0x07;
         loadLayer(layer);
         layer++;
+        if(layer >= N)
+            layer =0;
     }
     
 
@@ -438,6 +447,20 @@ uint8_t* getPlane(uint8_t dim, uint8_t coord)
 
     return config;
 }
+
+/* Nombre: fillPlane
+ * Descripción: Funcion de rellenado de un plano utilizando una cofiguracion dada para todos los ejes
+ * Argumentos:  dim - dimension del plano 
+                    X -> X
+                    Y -> Y
+                    Z -> Z
+                coord1 - coordenada del plano  
+                    X -> coordenada en X
+                    Y -> coordenada en Y
+                    Z -> Coordenanda en Z
+                config - configuracion del eje a replicar
+                
+ * Valor devuelto: Ninguno*/
 
 void fillPlane(uint8_t dim, uint8_t coord, uint8_t config)
 {

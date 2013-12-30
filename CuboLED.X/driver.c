@@ -128,9 +128,7 @@ void vTimer1(void){
     const static uint8_t sin[32] = {1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 2, 2, 2, 1, 1, 0, -1, -1, -2, -2, -2, -3, -3, -3, -3, -3, -2, -2, -2, -1, -1};
     //const static uint8_t sin[32] = {4, 5, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 6, 5, 5, 4, 3, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 3};
 
-    static  char mensaje[13] = {"Hello World "};
-    static unsigned int lenMensaje = 12;
-    uint8_t* config;
+    static  char mensaje[13] = {"THE GAME "};
 
     ticksVT1++;
     periodoVT1 = 2*get_ad(5)+100;
@@ -141,7 +139,7 @@ void vTimer1(void){
         {  
 //1         
             case 1:
-                animate_ring(false);
+                effect_crossing_piramids(false);
                 
                 break;  
 //2             
@@ -158,7 +156,10 @@ void vTimer1(void){
                 //
                 //effect_broadway_message(mensaje,true);
                 //putPlane(X,3,greek[i/100]);
-                putAscii(Y,0,'J');
+                //putAscii(X,0,'J');
+                // putAscii(Y,0,'J');
+                // putAscii(Z,7,'J');
+                putFont(Z,0,hiragana[2]);
                 break;
                 
 //3
@@ -172,14 +173,14 @@ void vTimer1(void){
                 //     setVoxel(sin[(j+i+8)&0x1F]+3,sin[(j+i)&0x1F]+3,1);
                 // }
 
-                effect_push_message(mensaje,X,6,false);
-                //effect_slide_message(mensaje,false);
+                //effect_push_message(mensaje,Y,4,false);
+                effect_slide_message(mensaje,false);
                 //effect_broadway_message(mensaje,false);
                 break;
 
             case 4: 
                 
-                animate_cube(false);
+                effect_animate_cube(false);
                 break;
 
             case 5:
@@ -196,7 +197,7 @@ void vTimer1(void){
                 // i++;
                 // if(i >= N)
                 //     i = 0;
-                rain(false);
+                effect_rain(false);
                 break;
             case 7:
                 i++;

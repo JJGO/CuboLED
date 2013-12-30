@@ -9,14 +9,18 @@
 
 //Librerias extrnas de efectos
 
-void draw_cube(uint8_t edge,uint8_t x,uint8_t y,uint8_t z);
-void ring(int l, int z);
-void set_oblique(int d);
-void random_fill(void);
+void effect_launcher(void);
+void effect_animate(void*);
+void effect_repeat(void*,uint8_t);
 
-void expand_cube(uint8_t reset);
-void rain(uint8_t reset);
-void animate_cube(uint8_t reset);
-void animate_ring(uint8_t reset);
+void draw_cube(uint8_t edge,uint8_t x,uint8_t y,uint8_t z);
+void effect_animate_cube(uint8_t reset);
+void effect_expand_cube(uint8_t reset);
+void effect_rain(uint8_t reset);
+void ring(int l, int z);
+void effect_crossing_piramids(uint8_t reset);
+void set_oblique(int d);
+void effect_spin(uint8_t* config);
+void random_fill(void);
 
 #endif
