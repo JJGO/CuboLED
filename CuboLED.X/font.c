@@ -163,7 +163,7 @@ void effect_broadway_message(char* message,uint8_t reset)
             letter = 0;
     }
 
-    buffer[0] = getColumnFont(ascii[message[(int)letter]],count++);
+    buffer[0] = getColumnFont(ascii[(int)message[letter]],count++);
 
     //COPY TO CUBE
     // Cara X=0
@@ -219,7 +219,7 @@ void effect_slide_message(char* message, uint8_t reset)
             letter = 0;
     }
 
-    buffer[0] = getColumnFont(ascii[message[(int)letter]],count++);
+    buffer[0] = getColumnFont(ascii[(int)message[letter]],count++);
 
     //COPY TO CUBE
     for(i = 0; i < N ; i++)

@@ -2,7 +2,7 @@
 #include "effect.h"
 
 
-peffect   current_effect;
+static peffect   current_effect;
 static uint16_t counter = 0;
 static uint16_t ticks_effect = 0;
 static uint16_t periodo_effect = 1000; //Periodo entre llamadas al efecto en milisegundos
@@ -16,6 +16,7 @@ void        effect_quit                 (void);
 void        effect_empty(uint8_t a);
 void        effect_launcher             (void);
 uint16_t    getPeriodo                  (void);
+void        setPeriodo                  (uint16_t);
 void        setFactor                   (uint8_t factor);
 
 void        draw_cube                   (uint8_t edge,uint8_t x,uint8_t y,uint8_t z);
@@ -81,6 +82,14 @@ void effect_launcher(void)
 uint16_t getPeriodo(void)
 {
     return periodo_effect;
+}
+
+void setPeriodo (uint16_t periodo)
+{
+    if(periodo>10){
+        analog_period = false;
+        periodo_effect = periodo;
+    }
 }
 
 void setFactor(uint8_t factor)
@@ -207,7 +216,7 @@ void effect_expand_cube(uint8_t reset)
 void effect_rain(uint8_t reset)
 {
     static uint8_t generate = true;
-    uint8_t y,z,drops;
+    uint8_t y,drops;
 
     if(reset)
     {
@@ -241,9 +250,9 @@ void effect_rain(uint8_t reset)
 void ring(int l, int z)
 {
     int a=4-l;
-    putAxis(X, a, z, (0xFF>>2*a)<<a);
+    putAxis(X, a,   z, (0xFF>>2*a)<<a);
     putAxis(X, 7-a, z, (0xFF>>2*a)<<a);
-    putAxis(Y, a, z, (0xFF>>2*a)<<a);
+    putAxis(Y, a,   z, (0xFF>>2*a)<<a);
     putAxis(Y, 7-a, z, (0xFF>>2*a)<<a);
 }
 

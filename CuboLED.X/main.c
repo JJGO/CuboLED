@@ -1,4 +1,4 @@
-#include "driver.h"
+#include "cubo.h"
 
 // 1. Eliminar el segmento de arranque flash
 // 2. Permitir la escritura del segmento de arranque flash
@@ -34,10 +34,8 @@ _FPOR(FPWRT_PWR128 & PWMPIN_ON & HPOL_ON & LPOL_ON & ALTI2C_OFF);
 _FICD(ICS_PGD1 & JTAGEN_OFF);
 
 int main(void){
-    mainInit();
     cubeInit();
+    
     effect_launch(&effect_rain);
     while(1);
-
-     
 }

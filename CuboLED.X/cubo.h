@@ -6,83 +6,57 @@
 #define _CUBO_H
 
 //Librerias utilizadas 
-#include "driver.h"
-#include "stdint.h"			// para el uso de int8_t
+
+#include "p33FJ32MC202.h"   // Libreria de Microchip para poder utilizar la sintaxis C
+#include "config.h"         // Fichero de configuracion para incializar el reloj y remapear los perifericos
+
+#include <stdint.h>			// para el uso de int8_t
 
 //Librerias externas para el uso del cubo
+#include "function.h"
 #include "effect.h"
-#include "parser.h"
-
-// Macros para utilizar máscaras de forma cómoda
-#define setV(a,b,c)   	(voxel[c][b] |= (0x01) << a)
-#define clearV(a,b,c)   (voxel[c][b] &= ~((0x01) << a))
-#define toggleV(a,b,c)	(voxel[c][b] = (0x01) << a)
-#define putV(a,b,c,p)	(voxel[c][b] ^= (p<<a))
-#define voxel(a,b,c) 	((voxel[c][b] >> a) & 0x01)
-
+#include "serial.h"
 
 // Macros para la defincion de constantes
-#define N 8
-
-
-#ifdef _MOD
-#define mod(a) (a & 0x07)
-#endif
-
-#ifndef _MOD
-#define mod(a) (a)
-#endif
-
-
-#define inrange(a)  (a == a & 0x07)
+#define N           8
 
 #define TREFRESH 	20		//periodo de refresco de las capas en decimas de milisegundo
 #define TCLEAR		2		//en microsegundos 
 
+#define true        1
+#define false       0
 
-#define _SDI	PORTBbits.RB11		
-#define _SDO	PORTBbits.RB10	
-#define _SCK	PORTBbits.RB7	
-#define _SS 	PORTBbits.RB6	
+//Macros del Timer1
+#define MS                  FCY/1000        // Valor de PR1 para funcionar a milisegundos
+#define DMS                 FCY/10000       // Valor de PR1 para funcionar a decimas de milisegundo
+#define US                  FCY/1000000     // Valor de PR1 para funcionar a microsegundos
 
-#define X 		1
-#define Y 		2
-#define Z 		3
+// Macros para utilizar máscaras de forma cómoda
+#define clear(file,b)     (file &= ~((0x0001) << b))
+#define set(file,b)       (file |= (0x0001) << b)
+#define put(file,b,x)     (file ^= (x<<b))
+#define toggle(file,b)    (file ^= (0x0001) << b)
+#define test(file,b)      (file & (0x0001 << b))
 
-#define true 1
-#define false 0
+//Macros de puertos
+#define TRISA_Def   0xFFFF
+#define TRISB_Def   0x0FFF
 
-// struct point 
-// {
-// 	uint8_t x;
-// 	uint8_t y;
-// 	uint8_t z;
-// };
+//Macros del detector de flanco
+#define SWITCH      test(~PORTB,2)          //Pulsador en RB2
+
+// Puertos del SPI
+#define _SDI	    PORTBbits.RB11		
+#define _SDO	    PORTBbits.RB10	
+#define _SCK	    PORTBbits.RB7	
+#define _SS 	    PORTBbits.RB6	
+
+extern uint8_t voxel[N][N];
+
+// Declaracion de funciones publicas
+void        cubeInit    (void);
+int         get_ad      (int canal);
 
 
-
-// Variables globales
-static uint8_t voxel[N][N];
-
-// Prototipos de las funciones publicas
-
-void 		cubeInit	(void);
-void 		setVoxel	(int8_t x, int8_t y, int8_t z);
-void 		clearVoxel	(int8_t x, int8_t y, int8_t z);
-void 		toggleVoxel	(int8_t x, int8_t y, int8_t z);
-void 		putVoxel	(int8_t x, int8_t y, int8_t z, uint8_t b);
-uint8_t		getVoxel	(int8_t x, int8_t y, int8_t z);
-void 		clearLayer	(int8_t z);
-void 		setLayer	(int8_t z);
-void 		clearCube	(void);
-void 		setCube		(void);
-void 		Refresh		(void);
-void 		putAxis		(uint8_t dim, int8_t  coord1, int8_t   coord2, uint8_t config);
-void 		putPlane	(uint8_t dim, int8_t  coord,  uint8_t* config);
-uint8_t		getAxis		(uint8_t dim, int8_t  coord1, int8_t   coord2);
-uint8_t* 	getPlane	(uint8_t dim, uint8_t coord);
-
-void        shiftCube   (uint8_t dim, uint8_t dir,    uint8_t closed);
-void        fillPlane   (uint8_t dim, uint8_t coord,  uint8_t config);
 
 #endif

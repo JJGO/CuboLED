@@ -1,4 +1,6 @@
+
 #include "uart.h"
+
 static char uc_cola_transmision[TAM_TR_UART];
 static char uc_cola_recepcion[TAM_REC_UART];
 static unsigned int ui_icabeza_tr = 0;

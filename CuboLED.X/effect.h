@@ -18,6 +18,7 @@ void        effect_quit                 (void);
 void        effect_empty(uint8_t a);
 void        effect_launcher             (void);
 uint16_t    getPeriodo                  (void);
+void        setPeriodo                  (uint16_t);
 void        setFactor                   (uint8_t factor);
 
 void        draw_cube                   (uint8_t edge,uint8_t x,uint8_t y,uint8_t z);

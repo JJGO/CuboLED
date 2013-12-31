@@ -12,7 +12,7 @@
 
 
 #include "cubo.h"
-#include "stdint.h"
+#include <stdint.h>
 
 #ifdef _ASCII
 
