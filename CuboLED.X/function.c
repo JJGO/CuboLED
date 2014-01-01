@@ -26,12 +26,13 @@ uint8_t*    getPlane        (uint8_t dim, uint8_t coord);
 void        fillPlane       (uint8_t dim, uint8_t coord,  uint8_t  config);
 void        shiftCube       (uint8_t dim, uint8_t dir,    uint8_t  closed);
 
-point       getRandomPoint  (void);
+point       Point           (uint8_t x, uint8_t y, uint8_t z);
+uint8_t     getPoint        (point p);
 void        setPoint        (point p);
 void        clearPoint      (point p);
-uint8_t     getPoint        (point p);
-point       Point           (uint8_t x, uint8_t y, uint8_t z);
 uint8_t     pointEquals     (point a, point p);
+point       sumPoints       (point a, point b);
+point       getRandomPoint  (void);
 
 uint8_t     count_neighboors(uint8_t x, uint8_t y, uint8_t z);
 
@@ -429,7 +430,7 @@ void clearPoint(point p)
 
 uint8_t getPoint(point p)
 {
-    voxel(p.x,p.y,p.z);
+    return voxel(p.x,p.y,p.z);
 }
 
 /* Nombre: pointEquals
@@ -488,11 +489,12 @@ uint8_t count_neighboors(uint8_t x, uint8_t y, uint8_t z)
                     {
                         if(inrange(z+dz))
                         {
-                            neighboors += voxel(x+dx,y+dy,z+dz);
+                            neighboors += getVoxel(x+dx,y+dy,z+dz);
                         }
                     }   
                 }
             }    
         }
     }
+    return neighboors;
 }

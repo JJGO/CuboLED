@@ -44,6 +44,9 @@ void cubeInit(void)
     SPIinit();              // Inicializacion del SPI
 
     initEffects();          // Incializacion del diccionario de efectos
+
+    init_snake();
+
     effect_quit();
 }
 

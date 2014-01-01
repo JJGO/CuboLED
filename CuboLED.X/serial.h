@@ -19,6 +19,8 @@
 #define FONT_ID         'F'
 #define GAMES_ID        'G'
 
+#define NUM_COMMAND     7
+
 #define NO_COMMAND      0 
 #define FWD_COMMAND     1
 #define REV_COMMAND     2 
@@ -27,6 +29,7 @@
 #define UP_COMMAND      5 
 #define DOWN_COMMAND    6   
 
+extern uint8_t echo;
 
 //Declaracion de funciones publicas
 

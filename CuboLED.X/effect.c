@@ -77,6 +77,7 @@ void effect_repeat(peffect effect, uint8_t iterations)
 
 void effect_quit(void)
 {
+    echo = true;
     clearCube();
     current_effect = &effect_empty;
 }

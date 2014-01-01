@@ -13,7 +13,7 @@
 
 //Librerias externas de efectos
 #include "font.h"                       // Libreria de efectos con cadenas de caracteres alfanumericos
-// #include "snake.h"                       // Libreria de juegos 
+#include "snake.h"                       // Libreria de juegos 
 
 #define TMIN        N*TREFRESH
 #define FACTOR_DEF  2

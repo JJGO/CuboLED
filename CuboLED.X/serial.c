@@ -8,7 +8,7 @@ static peffect effects[NUM_EFFECTS];
 
 // ------------------------------------ GLOBALES ------------------------------------------
 
-static uint8_t echo = true;
+uint8_t echo = true;
 static uint8_t current_command = 0;
 
 // ----------------------------------- PROTOTIPOS -----------------------------------------
@@ -39,7 +39,9 @@ void initEffects(void)
 
     effects[20] = &font_effect_standard_push_message; 
     effects[21] = &font_effect_broadway_message;      
-    effects[22] = &font_effect_slide_message;         
+    effects[22] = &font_effect_slide_message;      
+
+    effects[25] = &game_snake;   
 
 }
 
@@ -121,7 +123,7 @@ void parse_message(char* code)
 void send_int(uint8_t i)
 {
 
-    static const char mensaje[11] = {"ASCII = "};
+    static const char mensaje[11] = {"0x"};
     char periodoStr[64],*periodoPtr;
     
     PonerEnColaTransmisionUART('\r');
@@ -132,7 +134,7 @@ void send_int(uint8_t i)
     {
         PonerEnColaTransmisionUART(*periodoPtr++);
     }
-    itoa(periodoStr,i,10);
+    itoa(periodoStr,i,16);
     periodoPtr = periodoStr;
     while(*periodoPtr)
     {
@@ -166,8 +168,12 @@ void send_periodo(void)
 
 void parse_effect(char* code)
 {
-    uint8_t effect_id = atoi(code+1);            
-    effect_launch(effects[effect_id]);
+    uint8_t effect_id = atoi(code+1);    
+    if(effect_id < NUM_EFFECTS)
+    {
+        effect_launch(effects[effect_id]);
+    }        
+    
 }
 
 
