@@ -7,16 +7,22 @@
 // ------------------------------------ GLOBALES ------------------------------------------
 
 static peffect   current_effect;        // Puntero al efecto actual que se esta ejecutando
-static uint16_t counter = 0;            // Contador de iteraciones pendientes, si vale -1 es infinito
-static uint16_t ticks_effect = 0;       // Contador del timer para hacer la actualizacion de 
-static uint16_t periodo_effect = 1000;  //Periodo entre llamadas al efecto en milisegundos 
-uint8_t analog_period = true;
-static uint8_t factor = 2;
+static peffect   second_effect;         // Puntero al efecto secundario que se esta ejecutando mediante el efecto actual
+static uint16_t  counter = 0;           // Contador de iteraciones pendientes, si vale -1 es infinito
+static uint8_t   second_active = false;  // flag para saber si se esta ejecutando un 
+
+static uint16_t  ticks_effect = 0;       // Contador del timer para hacer la actualizacion de 
+static uint16_t  periodo_effect = 1000;  //Periodo entre llamadas al efecto en milisegundos 
+       uint8_t   analog_period = true;
+static uint8_t   factor = 2;
 // ----------------------------------- PROTOTIPOS -----------------------------------------
 
 void        effect_launch               (peffect effect);
+void        effect_launch_second        (peffect effect, uint8_t iterations);
 void        effect_repeat               (peffect effect, uint8_t iterations);
+void        effect_clean                (void);
 void        effect_quit                 (void);
+void        effect_second_quit          (void);
 void        effect_empty                (uint8_t a);
 void        effect_launcher             (void);
 
@@ -39,6 +45,40 @@ void        effect_random_move_axis     (uint8_t  reset);
 
 // ----------------------------------- FUNCIONES ------------------------------------------
 
+/*Nombre: effect_launcher
+ * Descripcion: Rutina de monitorizacion y ejecucion de los efectos, llama a los efectos y obtiene el periodo 
+                a partir del potenciometro si esta habilitado 
+ * Argumentos:  Ninguno
+ * Valor devuelto: Ninguno*/
+
+void effect_launcher(void)
+{
+    ticks_effect++;
+    if(analog_period)
+        periodo_effect = factor*get_ad(5)+TMIN; // si esta habilitado por el efecto el periodo es variable 
+    if(ticks_effect >= periodo_effect)
+    {
+        ticks_effect = 0;
+        if(second_active)
+        {
+            (*second_effect)(false);
+            if(counter > 0){
+                counter--;
+            }else if(counter == 0){
+                effect_clean();
+                second_active = false;
+            }
+        }else
+        {
+            (*current_effect)(false);
+            if(counter > 0){
+                counter--;
+            }else if(counter == 0){
+                effect_quit();
+            }
+        }
+    }
+}
 
 /*Nombre: effect_launch
  * Descripcion: Resetea el efecto a lanzar y lo establece como el efecto actual de forma indefinida
@@ -47,11 +87,23 @@ void        effect_random_move_axis     (uint8_t  reset);
 
 void effect_launch(peffect effect)
 {
-    if(current_effect != &effect_empty)
-        effect_quit();
+    effect_repeat(effect,-1);
+}
+
+/*Nombre: effect_launch_second
+ * Descripcion: Ejecuta un numero de iteraciones un efecto secundario, sin llegar a salir de un efecto superior o padre 
+ * Argumentos: effect - puntero al efecto a ejecutar
+               iterations - numero de iteraciones que el efecto ejecutara
+ * Valor devuelto: Ninguno*/
+
+void effect_launch_second(peffect effect, uint8_t iterations)
+{
+    if(current_effect == &effect_empty)
+        effect_repeat(effect,iterations);       // Si no tiene padre simplemente se lanza
     (*effect)(true);      // resetea el efecto
-    current_effect = effect;
-    counter = -1;
+    second_effect = effect;
+    second_active = true;
+    counter = iterations;
 }
 
 /*Nombre: effect_repeat
@@ -70,6 +122,20 @@ void effect_repeat(peffect effect, uint8_t iterations)
     
 }
 
+
+/*Nombre: effect_clean
+ * Descripcion: Limpia el cuboLED y sus variables asociadas, pero si tocar el puntero a efecto
+ * Argumentos:  Ninguno
+ * Valor devuelto: Ninguno*/
+
+void effect_clean(void)
+{
+    echo = true;
+    analog_period = true;
+    factor = FACTOR_DEF;
+    clearCube();
+}
+
 /*Nombre: effect_quit
  * Descripcion: Sale del efecto actual y limpia el cubo LED
  * Argumentos:  Ninguno
@@ -77,11 +143,20 @@ void effect_repeat(peffect effect, uint8_t iterations)
 
 void effect_quit(void)
 {
-    echo = true;
-    analog_period = true;
-    factor = FACTOR_DEF;
-    clearCube();
+    effect_clean();
     current_effect = &effect_empty;
+}
+
+/*Nombre: effect_second_quit
+ * Descripcion: Sale del efecto secundario para volver al actual y limpia el cubo LED
+ * Argumentos:  Ninguno
+ * Valor devuelto: Ninguno*/
+
+void effect_second_quit(void)
+{
+    effect_clean();
+    second_effect = &effect_empty;
+    second_active = false;
 }
 
 /*Nombre: effect_empty
@@ -94,28 +169,7 @@ void effect_empty(uint8_t a)
     
 }
 
-/*Nombre: effect_empty
- * Descripcion: Rutina de monitorizacion y ejecucion de los efectos, llama a los efectos y obtiene el periodo 
-                a partir del potenciometro si esta habilitado 
- * Argumentos:  Ninguno
- * Valor devuelto: Ninguno*/
 
-void effect_launcher(void)
-{
-    ticks_effect++;
-    if(analog_period)
-        periodo_effect = factor*get_ad(5)+TMIN; // si esta habilitado por el efecto el periodo es variable 
-    if(ticks_effect >= periodo_effect)
-    {
-        ticks_effect = 0;
-        (*current_effect)(false);
-        if(counter > 0){
-            counter--;
-        }else if(counter == 0){
-            effect_quit();
-        }
-    }
-}
 
 /*Nombre: getPeriodo
  * Descripcion: Funcion de obtencion del periodo actual para el facil setup de DEMOS 

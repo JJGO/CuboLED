@@ -18,9 +18,10 @@ static point cmd2dir[NUM_COMMAND];
 
 // ----------------------------------- PROTOTIPOS -----------------------------------------
 
-void    init_snake  (void);
-void    game_snake  (uint8_t reset);
-void    set_food    (void);
+void    init_snake      (void);
+void    game_snake      (uint8_t reset);
+void    effect_snake    (uint8_t reset);
+void    set_food        (void);
 //void    getNewTail  (void);
 
 // ----------------------------------- FUNCIONES ------------------------------------------
@@ -36,6 +37,39 @@ void init_snake(void)
 }
 
 void game_snake(uint8_t reset)
+{
+    static uint8_t estado = 0;
+
+
+    if(reset)
+    {
+        estado = 0;
+
+        return;
+    }
+
+    estado++;
+    switch(estado)
+    {
+        case 1:
+            setMessage("3 2 1 ");
+            effect_launch_second(&font_effect_standard_push_message,N*5);
+            break;
+        case 2: 
+            effect_launch_second(&effect_snake,-1);
+            break;
+        case 3:
+            effect_launch_second(&font_effect_slide_message,(GOM_LENGTH)*N);
+            break;
+        default:
+            effect_quit();
+            break;
+
+    }   
+}
+
+
+void effect_snake(uint8_t reset)
 {
     
     static uint8_t snake_length;
@@ -118,14 +152,14 @@ void game_snake(uint8_t reset)
     {
         echo = true;
         cleanBuffer();
-        send_int(snake_length - MIN_LENGTH);
 
         game_over_msg[GOM_LENGTH-1]= ' ';
         game_over_msg[GOM_LENGTH-2]= (snake_length - MIN_LENGTH)%10+'0';
         game_over_msg[GOM_LENGTH-3]= (snake_length - MIN_LENGTH)/10+'0';
         setMessage(game_over_msg);
         setPeriodo(1000);
-        effect_repeat(&font_effect_slide_message,(GOM_LENGTH)*N);
+        effect_second_quit();
+        //effect_repeat(&font_effect_slide_message,(GOM_LENGTH)*N);
     }
 }
 
@@ -138,9 +172,6 @@ void set_food(void)
             if(count_neighboors(food.x,food.y,food.z)==0)
             {
                 setPoint(food);
-                // send_int(food.x);
-                // send_int(food.y);
-                // send_int(food.z);
                 return; 
             }  
         }
