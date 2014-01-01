@@ -9,18 +9,15 @@
 #include "cubo.h"
 #include <stdint.h>       // para el uso de int8_t
 
-#define PX  1            // Positive X direction
-#define NX  2            // Positive X direction              
-#define PY  3            // Positive Y direction
-#define NY  4            // Positive Y direction
-#define PZ  5            // Positive Z direction
-#define NZ  6            // Positive Z direction
+#define MAX_LENGTH  64
+#define MIN_LENGTH  3
+#define X_0         0
+#define Y_0         0
+#define Z_0         0
 
 // Definicion de funciones publicas
 
 void    init_snake  (void);
 void    game_snake  (uint8_t reset);
-
-
 
 #endif

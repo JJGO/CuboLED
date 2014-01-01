@@ -5,35 +5,33 @@
 
 #include "snake.h"
 
+#define GOM_LENGTH  13
+
 // ------------------------------------ GLOBALES ------------------------------------------
 
-static point head, tail, food;
-static point dirPoint[6];
+static point head,food;
+static point snake[MAX_LENGTH];
+
 static uint8_t game_over = false;
-static uint8_t cmd2dir[NUM_COMMAND];
+static point cmd2dir[NUM_COMMAND];
+
+
 // ----------------------------------- PROTOTIPOS -----------------------------------------
 
 void    init_snake  (void);
 void    game_snake  (uint8_t reset);
 void    set_food    (void);
-void    getNewTail  (void);
+//void    getNewTail  (void);
 
 // ----------------------------------- FUNCIONES ------------------------------------------
 void init_snake(void)
 {
-    cmd2dir[FWD_COMMAND  ] = PY;
-    cmd2dir[REV_COMMAND  ] = NY;
-    cmd2dir[LEFT_COMMAND ] = NX;
-    cmd2dir[RIGHT_COMMAND] = PX;
-    cmd2dir[UP_COMMAND   ] = PZ;
-    cmd2dir[DOWN_COMMAND ] = NZ;
-
-    dirPoint[PX] = Point( 1,  0,  0);
-    dirPoint[NX] = Point(-1,  0,  0);
-    dirPoint[PY] = Point( 0,  1,  0);
-    dirPoint[NY] = Point( 0, -1,  0);
-    dirPoint[PZ] = Point( 0,  0,  1);
-    dirPoint[NZ] = Point( 0,  0, -1);
+    cmd2dir[FWD_COMMAND  ] = Point( 0,  1,  0);
+    cmd2dir[REV_COMMAND  ] = Point( 0, -1,  0);
+    cmd2dir[LEFT_COMMAND ] = Point(-1,  0,  0);
+    cmd2dir[RIGHT_COMMAND] = Point( 1,  0,  0);
+    cmd2dir[UP_COMMAND   ] = Point( 0,  0,  1);
+    cmd2dir[DOWN_COMMAND ] = Point( 0,  0, -1);
 
 }
 
@@ -41,25 +39,28 @@ void game_snake(uint8_t reset)
 {
     
     static uint8_t snake_length;
-    static uint8_t direction;
+    static point direction;
+    static char game_over_msg[GOM_LENGTH] = {"GAME OVER "};
+    uint8_t i;
     
-    volatile uint8_t command;
+    uint8_t command;
 
     if(reset)
     {
         clearCube();
         game_over = false;      // 
-        snake_length = 3;
-        head.x = 3; tail.x = 3;
-        head.y = 3; tail.y = 3;
-        head.z = 3; tail.z = 1;
-        direction = PZ;          // direccion +Z
-        setVoxel(3,3,3);         // head
-        setVoxel(3,3,2);
-        setVoxel(3,3,1);         //tail
+        snake_length = MIN_LENGTH;
+
+
+        for(i = 0; i<snake_length; i--)
+        {
+            snake[i] = Point(X_0,Y_0,Z_0+snake_length-1-i);
+            setPoint(snake[i]);
+        }
+        direction = cmd2dir[UP_COMMAND];            // direccion +Z
         set_food();
         
-        setFactor(10);          // Para que sea manejable se ralentiza
+        setFactor(8);                               // Para que sea manejable se ralentiza
         
         echo = false;
 
@@ -67,79 +68,64 @@ void game_snake(uint8_t reset)
 
     }
 
+    
+        
     command = getCommand();
-    if(command)
+    if(command != NO_COMMAND)     
     {
         direction = cmd2dir[command];
     }
-
     // Obtiene la nueva posicion de la cabeza 
-    head = sumPoints(head,dirPoint[direction]);
+    head = sumPoints(snake[0],direction);
     //Comprueba que no se haya salido por las paredes
-    if(!inrange(head.x))
+    if(!inrange(head.x) || !inrange(head.y) || !inrange(head.z))
     {
         game_over = true;
-        //if(head.x == N)
-        //{
-        //    fillPlane(X,N-1,0xff);
-        //}else
-        //{
-        //    fillPlane(X,0,0xff);
-        //}
-    }
-    else if(!inrange(head.y))
-    {
-        game_over = true;
-        // if(head.y == N)
-        //{   
-        //    fillPlane(Y,N-1,0xff);
-        //}else
-        //{
-        //    fillPlane(Y,0,0xff);
-        //}
-
-    }
-    else if(!inrange(head.z))
-    {
-        game_over = true;
-        //if(head.z == N)
-        //{
-        //    fillPlane(Z,N-1,0xff);
-        //}else
-        //{
-        //    fillPlane(Z,0,0xff);
-        //}
+        
     }
 
-    // 
     if(getPoint(head))              
     {
-        if(pointEquals(head,food))  //Si alcanza la comida
+        if(pointEquals(head,food))                  //Si alcanza la comida
         {
             snake_length++;
+            if(snake_length % 10 == 0)              // Cada 10 aumenta la velocidad
+            {
+                setFactor(8-snake_length/10);
+            }
 
-            set_food();        // Coloca de forma aleatoria la comida
-            // tail no se modifica
-        }else{                      //Si choca consigo misma
+            set_food();                             // Coloca de forma aleatoria la comida
+
+        }else{                                      // Si choca consigo misma
              game_over = true;
         }
        
+    }else{                                          // Else, Hay que desplazar la cola
+        setPoint(head);     
+        clearPoint(snake[snake_length-1]);
     }
-    else{               // Else, Hay que desplazar la cola
-        setPoint(head);
-        clearPoint(tail);       
-        getNewTail();
+
+    for(i = snake_length-1; i > 0; i--)
+    {
+        snake[i] = snake[i-1];
     }
+    snake[0] = head;
+
+    setPoint(food);
     
     // Si se ha acabado el juego
     if(game_over)
     {
         echo = true;
-        send_int(head.x);
-        send_int(head.y);
-        send_int(head.z);
-        setMessage("GAME OVER");
-        effect_repeat(&font_effect_slide_message,9*N);
+        cleanBuffer();
+        send_int(snake_length - MIN_LENGTH);
+
+        game_over_msg[GOM_LENGTH-1]= ' ';
+        game_over_msg[GOM_LENGTH-2]= (snake_length - MIN_LENGTH)%10+'0';
+        game_over_msg[GOM_LENGTH-3]= (snake_length - MIN_LENGTH)/10+'0';
+        setMessage(game_over_msg);
+        setPeriodo(1000);
+        effect_repeat(&font_effect_slide_message,(GOM_LENGTH)*N);
     }
 }
 
@@ -149,93 +135,15 @@ void set_food(void)
         food = getRandomPoint();
         if(!getPoint(food))   //Si esta apagado es posible
         {   
-            //if(count_neighboors(food.x,food.y,food.z)==0)
-            //{
+            if(count_neighboors(food.x,food.y,food.z)==0)
+            {
                 setPoint(food);
+                // send_int(food.x);
+                // send_int(food.y);
+                // send_int(food.z);
                 return; 
-            //}  
+            }  
         }
-    }while(!getPoint(food));  //Mientras este encendido
+    }while(!getPoint(food));  //Mientras este apagado
 
 }
-
-void getNewTail(void)
-{
-    point new_tail;
-    uint8_t i;
-    for(i = 1; i < 7; i++)
-    {
-        new_tail = sumPoints(tail,dirPoint[i]);
-        if(getPoint(new_tail))
-        {
-            if(!pointEquals(new_tail,food)){
-                tail = new_tail;
-                return;
-            }
-        }
-    }
-    //game_over = true;
-}
-
-//switch(direction)
-    // {
-    //     case +X:
-    //         if(inrange(head.x+1,head.y,head.z))
-    //         {
-    //             head.x++;
-    //         }else{
-    //             game_over = true;
-    //             fillPlane(X,N-1,0xff);
-    //         }
-    //         break;
-
-    //     case -X:
-    //         if(inrange(head.x-1,head.y,head.z))
-    //         {
-    //             head.x--;
-    //         }else{
-    //             game_over = true;
-    //             fillPlane(X,0,0xff);
-    //         }
-    //         break;
-
-    //     case +Y:
-    //         if(inrange(head.x,head.y+1,head.z))
-    //         {
-    //             head.y++;
-    //         }else{
-    //             game_over = true;
-    //             fillPlane(Y,N-1,0xff);
-    //         }
-    //         break;
-
-    //     case -Y:
-    //         if(inrange(head.x,head.y-1,head.z))
-    //         {
-    //             head.y--;
-    //         }else{
-    //             game_over = true;
-    //             fillPlane(Y,0,0xff);
-    //         }
-    //         break;
-
-    //     case +Z:
-    //         if(inrange(head.x,head.y,head.z+1))
-    //         {
-    //             head.z++;
-    //         }else{
-    //             game_over = true;
-    //             fillPlane(Z,N-1,0xff);
-    //         }
-    //         break;
-
-    //     case -Z:
-    //         if(inrange(head.x,head.y,head.z-1))
-    //         {
-    //             head.z--;
-    //         }else{
-    //             game_over = true;
-    //             fillPlane(Z,0,0xff);
-    //         }
-    //         break;
-    // }

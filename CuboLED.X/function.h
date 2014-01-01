@@ -69,6 +69,7 @@ point       Point           (uint8_t x, uint8_t y, uint8_t z);
 uint8_t     getPoint        (point p);
 void        setPoint        (point p);
 void        clearPoint      (point p);
+void        togglePoint     (point p);
 uint8_t     pointEquals     (point a, point p);
 point       sumPoints       (point a, point b);
 point       getRandomPoint  (void);

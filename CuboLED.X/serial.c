@@ -11,6 +11,9 @@ static peffect effects[NUM_EFFECTS];
 uint8_t echo = true;
 static uint8_t current_command = 0;
 
+static char buffer[BUFFER_SIZE];
+static char* pbuffer = buffer;
+
 // ----------------------------------- PROTOTIPOS -----------------------------------------
 void    initEffects     (void);
 char    watch_uart      (void);
@@ -19,6 +22,7 @@ void    send_periodo    (void);
 void    parse_effect    (char* code);
 void    parse_command   (uint8_t message);
 uint8_t getCommand      (void);
+void    cleanBuffer     (void);
 
 // ----------------------------------- FUNCIONES ------------------------------------------
 
@@ -54,8 +58,8 @@ void initEffects(void)
 char watch_uart(void)
 {
     static int mensaje;
-    static int i = 0;
-    static char buffer[BUFFER_SIZE];
+    //static int i = 0;
+    
      
     if (HayAlgoRecibido()) {
         mensaje = SacarDeColaRecepcionUART();
@@ -69,22 +73,22 @@ char watch_uart(void)
 
         if(mensaje == 0x08) // Backspace
         {
-            if(i > 0)
+            if(pbuffer-buffer > 0)
             {
-                i--;
+                pbuffer--;
             }
         }
         else if(mensaje == '\r') //Nueva linea
         {
             PonerEnColaTransmisionUART('\n');
             Transmite();
-            buffer[i] = '\0';
-            i = 0;
+            *pbuffer = '\0';
+            pbuffer = buffer; //i = 0;
             parse_message(buffer);
         }else{
-            buffer[i++] = mensaje;
-            if(i>BUFFER_SIZE)
-                i = 0;
+            *pbuffer++ = mensaje;
+            if(pbuffer-buffer >BUFFER_SIZE)
+                pbuffer = buffer; //i = 0;
         }
         parse_command(mensaje);
     }
@@ -106,6 +110,8 @@ void parse_message(char* code)
         case 'P':
             if(code[1] == 0){
                 send_periodo();
+            }else if(code[1] == 'A'){
+                analog_period = true;
             }else{
                 setPeriodo(atoi(code+1));
             }
@@ -196,12 +202,12 @@ void parse_command(uint8_t message)
         case 'D':
             current_command = RIGHT_COMMAND;
             break;
-        case 'o':
-        case 'O':
+        case 'i':
+        case 'I':
             current_command = UP_COMMAND;
             break;
-        case 'l':
-        case 'L':
+        case 'k':
+        case 'K':
             current_command = DOWN_COMMAND;
             break;
         default:
@@ -215,6 +221,11 @@ uint8_t getCommand(void)
     uint8_t cmd = current_command;
     current_command = NO_COMMAND;
     return cmd; 
+}
+
+void cleanBuffer (void)
+{
+    pbuffer = buffer;
 }
 
 

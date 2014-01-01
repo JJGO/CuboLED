@@ -9,9 +9,9 @@
 static peffect   current_effect;        // Puntero al efecto actual que se esta ejecutando
 static uint16_t counter = 0;            // Contador de iteraciones pendientes, si vale -1 es infinito
 static uint16_t ticks_effect = 0;       // Contador del timer para hacer la actualizacion de 
-static uint16_t periodo_effect = 1000;  //Periodo entre llamadas al efecto en milisegundos
-static uint8_t analog_period = true;
-static uint8_t analog_factor = 2;
+static uint16_t periodo_effect = 1000;  //Periodo entre llamadas al efecto en milisegundos 
+uint8_t analog_period = true;
+static uint8_t factor = 2;
 // ----------------------------------- PROTOTIPOS -----------------------------------------
 
 void        effect_launch               (peffect effect);
@@ -47,8 +47,8 @@ void        effect_random_move_axis     (uint8_t  reset);
 
 void effect_launch(peffect effect)
 {
-    analog_period = true;
-    analog_factor = FACTOR_DEF;
+    if(current_effect != &effect_empty)
+        effect_quit();
     (*effect)(true);      // resetea el efecto
     current_effect = effect;
     counter = -1;
@@ -62,9 +62,9 @@ void effect_launch(peffect effect)
 
 void effect_repeat(peffect effect, uint8_t iterations)
 {
-    analog_period = true;
-    analog_factor = FACTOR_DEF;
-    (*effect)(true);
+    if(current_effect != &effect_empty)
+        effect_quit();
+    (*effect)(true);    // resetea el efecto
     current_effect = effect;
     counter = iterations;
     
@@ -78,6 +78,8 @@ void effect_repeat(peffect effect, uint8_t iterations)
 void effect_quit(void)
 {
     echo = true;
+    analog_period = true;
+    factor = FACTOR_DEF;
     clearCube();
     current_effect = &effect_empty;
 }
@@ -102,7 +104,7 @@ void effect_launcher(void)
 {
     ticks_effect++;
     if(analog_period)
-        periodo_effect = analog_factor*get_ad(5)+TMIN; // si esta habilitado por el efecto el periodo es variable 
+        periodo_effect = factor*get_ad(5)+TMIN; // si esta habilitado por el efecto el periodo es variable 
     if(ticks_effect >= periodo_effect)
     {
         ticks_effect = 0;
@@ -145,9 +147,9 @@ void setPeriodo (uint16_t periodo)
  * Argumentos: El valor a fijar del factor de velocidad aplicado a la lectura analogica
  * Valor devuelto: Ninguno*/
 
-void setFactor(uint8_t factor)
+void setFactor(uint8_t f)
 {
-    analog_factor = factor;
+    factor = f;
 }
 
 /*Nombre: draw_cube

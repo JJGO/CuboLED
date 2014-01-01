@@ -30,6 +30,7 @@ point       Point           (uint8_t x, uint8_t y, uint8_t z);
 uint8_t     getPoint        (point p);
 void        setPoint        (point p);
 void        clearPoint      (point p);
+void        togglePoint     (point p);
 uint8_t     pointEquals     (point a, point p);
 point       sumPoints       (point a, point b);
 point       getRandomPoint  (void);
@@ -413,7 +414,7 @@ void setPoint(point p)
     setV(p.x,p.y,p.z);
 }
 
-/* Nombre: setPoint
+/* Nombre: clearPoint
  * Descripción: Funcion para desactivar el voxel de coordenadas p.x, p.y, p.z
  * Argumentos:  p - estructura de tipo punto que almacena las coordenadas
  * Valor devuelto: Ninguno */ 
@@ -421,6 +422,16 @@ void setPoint(point p)
 void clearPoint(point p)
 {
     clearV(p.x,p.y,p.z);
+}
+
+/* Nombre: togglePoint
+ * Descripción: Funcion para conmutar el voxel de coordenadas p.x, p.y, p.z
+ * Argumentos:  p - estructura de tipo punto que almacena las coordenadas
+ * Valor devuelto: Ninguno */ 
+
+void togglePoint(point p)
+{
+    toggleV(p.x,p.y,p.z);
 }
 
 /* Nombre: setPoint
@@ -475,7 +486,7 @@ point getRandomPoint(void)
 
 uint8_t count_neighboors(uint8_t x, uint8_t y, uint8_t z)
 {
-    uint8_t neighboors;
+    uint8_t neighboors=0;
     int8_t dx, dy, dz;
     for(dx = -1; dx < 2 ; dx++)
     {

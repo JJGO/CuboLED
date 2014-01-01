@@ -40,5 +40,6 @@ void    send_periodo    (void);
 void    parse_effect    (char* code);
 void    parse_command   (uint8_t message);
 uint8_t getCommand      (void);
+void    cleanBuffer     (void);
 
 #endif

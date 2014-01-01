@@ -20,6 +20,8 @@
 
 typedef void (*peffect)(uint8_t);       //puntero a efecto que toma el parametro de reset
 
+extern uint8_t analog_period;
+
 // Definicion de funciones publicas 
 
 void        effect_launch               (peffect effect);
