@@ -88,7 +88,8 @@ void PonerEnColaRecepcionUART(unsigned char uc_caracter) {
 * Valor devuelto:
 * 	unsigned char: Caracter recuperado de la cola */ 
 
-unsigned char SacarDeColaRecepcionUART(){
+unsigned char SacarDeColaRecepcionUART()
+{
 	unsigned char uc_caracter;
 	uc_caracter = uc_cola_recepcion[ui_icola_rec];
 	ui_icola_rec++;

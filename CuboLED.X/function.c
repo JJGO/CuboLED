@@ -3,6 +3,8 @@
 // function.c
 
 
+
+
 #include "function.h"
 
 // ----------------------------------- PROTOTIPOS -----------------------------------------
@@ -23,6 +25,15 @@ uint8_t     getAxis         (uint8_t dim, int8_t  coord1, int8_t   coord2);
 uint8_t*    getPlane        (uint8_t dim, uint8_t coord);
 void        fillPlane       (uint8_t dim, uint8_t coord,  uint8_t  config);
 void        shiftCube       (uint8_t dim, uint8_t dir,    uint8_t  closed);
+
+point       getRandomPoint  (void);
+void        setPoint        (point p);
+void        clearPoint      (point p);
+uint8_t     getPoint        (point p);
+point       Point           (uint8_t x, uint8_t y, uint8_t z);
+uint8_t     pointEquals     (point a, point p);
+
+uint8_t     count_neighboors(uint8_t x, uint8_t y, uint8_t z);
 
 // ----------------------------------- FUNCIONES -----------------------------------------
 
@@ -373,4 +384,115 @@ void shiftCube(uint8_t dim,uint8_t dir, uint8_t closed)
         
     }
 
+}
+
+/* Nombre: Point
+ * Descripción: Constructor de la clase Punto
+ * Argumentos:  x - coordenada en x
+                y - coordenada en y
+                z - coordenada en z
+ * Valor devuelto: p - la estructura de tipo point con esos valores */ 
+
+point Point(uint8_t x, uint8_t y, uint8_t z)
+{
+    point p;
+    p.x = x;
+    p.y = y;
+    p.z = z;
+    return p;
+}
+
+/* Nombre: setPoint
+ * Descripción: Funcion para activar el voxel de coordenadas p.x, p.y, p.z
+ * Argumentos:  p - estructura de tipo punto que almacena las coordenadas
+ * Valor devuelto: Ninguno */ 
+
+void setPoint(point p)
+{
+    setV(p.x,p.y,p.z);
+}
+
+/* Nombre: setPoint
+ * Descripción: Funcion para desactivar el voxel de coordenadas p.x, p.y, p.z
+ * Argumentos:  p - estructura de tipo punto que almacena las coordenadas
+ * Valor devuelto: Ninguno */ 
+
+void clearPoint(point p)
+{
+    clearV(p.x,p.y,p.z);
+}
+
+/* Nombre: setPoint
+ * Descripción: Funcion obtener el valor del voxel de coordenadas p.x, p.y, p.z
+ * Argumentos:  p - estructura de tipo punto que almacena las coordenadas
+ * Valor devuelto: Valor del voxel de coordenadas p.x, p.y, p.z */ 
+
+uint8_t getPoint(point p)
+{
+    voxel(p.x,p.y,p.z);
+}
+
+/* Nombre: pointEquals
+ * Descripción: Funcion para comprobar la igualdad coordenada a coordenada de dos puntos
+ * Argumentos:  a - estructura de tipo punto que almacena las coordenadas del primer punto
+                b - estructura de tipo punto que almacena las coordenadas del segundo punto
+ * Valor devuelto: valor booleano de igualdad */ 
+
+uint8_t pointEquals(point a, point b)
+{
+    if(a.x == b.x)
+        if(a.y == b.y)
+            if(a.z == b.z)
+                return true;
+    return false;
+}
+
+/* Nombre: sumPoints
+ * Descripción: Funcion para sumar dos puntos coordenada a coordenada (uno debera representar un vector)
+ * Argumentos:  a - estructura de tipo punto que almacena las coordenadas del primer punto
+                b - estructura de tipo punto que almacena las coordenadas del segundo punto (direccion)
+ * Valor devuelto: valor booleano de igualdad */ 
+
+point sumPoints(point a, point b)
+{
+    a.x += b.x;
+    a.y += b.y;
+    a.z += b.z;
+    return a;
+}
+
+/* Nombre: pointEquals
+ * Descripción: Funcion para comprobar la igualdad coordenada a coordenada de dos puntos
+ * Argumentos:  a - estructura de tipo punto que almacena las coordenadas del primer punto
+                b - estructura de tipo punto que almacena las coordenadas del segundo punto
+ * Valor devuelto: valor booleano de igualdad */ 
+
+point getRandomPoint(void)
+{
+    return Point(rand()&0x07,rand()&0x07,rand()&0x07);
+}
+
+uint8_t count_neighboors(uint8_t x, uint8_t y, uint8_t z)
+{
+    uint8_t neighboors;
+    int8_t dx, dy, dz;
+    for(dx = -1; dx < 2 ; dx++)
+    {
+        if(inrange(x+dx))
+        {
+            for(dy = -1; dy < 2 ; dy++)
+            {
+                if(inrange(z+dz))
+                {
+                    for(dz = -1; dz < 2 ; dz++)
+                    {
+                        if(inrange(z+dz))
+                        {
+                            neighboors += voxel(x+dx,y+dy,z+dz);
+                        }
+                    }   
+                }
+            }    
+        }
+    }
 }

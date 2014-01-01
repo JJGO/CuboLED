@@ -4,22 +4,29 @@
 
 #include "serial.h"
 
-static peffect effects[EFFECTS_NUM];
+static peffect effects[NUM_EFFECTS];
 
+// ------------------------------------ GLOBALES ------------------------------------------
+
+static uint8_t echo = true;
+static uint8_t current_command = 0;
 
 // ----------------------------------- PROTOTIPOS -----------------------------------------
-void initEffects(void);
-char watch_uart(void);
-void parse_message(char* code);
-void send_periodo(void);
-void parse_effect(char* code);
+void    initEffects     (void);
+char    watch_uart      (void);
+void    parse_message   (char* code);
+void    send_periodo    (void);
+void    parse_effect    (char* code);
+void    parse_command   (uint8_t message);
+uint8_t getCommand      (void);
 
 // ----------------------------------- FUNCIONES ------------------------------------------
 
 void initEffects(void)
 {   
     uint8_t i;
-    for(i=0; i<EFFECTS_NUM; i++)
+
+    for(i=0; i<NUM_EFFECTS; i++)
     {
         effects[i] = &effect_empty;
     }
@@ -27,6 +34,12 @@ void initEffects(void)
     effects[11] = &effect_expand_cube;
     effects[12] = &effect_rain;
     effects[13] = &effect_crossing_piramids;
+    effects[14] = &effect_sweep_plane;
+    effects[15] = &effect_random_move_axis;
+
+    effects[20] = &font_effect_standard_push_message; 
+    effects[21] = &font_effect_broadway_message;      
+    effects[22] = &font_effect_slide_message;         
 
 }
 
@@ -40,13 +53,18 @@ char watch_uart(void)
 {
     static int mensaje;
     static int i = 0;
-    static char buffer[64];
+    static char buffer[BUFFER_SIZE];
+     
     if (HayAlgoRecibido()) {
         mensaje = SacarDeColaRecepcionUART();
             //Operar Mensaje
-        PonerEnColaTransmisionUART(mensaje);        //Realiza el eco de lo recibido
-        send_int(mensaje);
-        Transmite();
+
+        if(echo)
+        {
+            PonerEnColaTransmisionUART(mensaje);        //Realiza el eco de lo recibido
+            Transmite();
+        }
+
         if(mensaje == 0x08) // Backspace
         {
             if(i > 0)
@@ -54,7 +72,7 @@ char watch_uart(void)
                 i--;
             }
         }
-        else if(mensaje == '\r')
+        else if(mensaje == '\r') //Nueva linea
         {
             PonerEnColaTransmisionUART('\n');
             Transmite();
@@ -63,9 +81,10 @@ char watch_uart(void)
             parse_message(buffer);
         }else{
             buffer[i++] = mensaje;
-            if(i>64)
+            if(i>BUFFER_SIZE)
                 i = 0;
         }
+        parse_command(mensaje);
     }
     return mensaje;
 }
@@ -89,8 +108,12 @@ void parse_message(char* code)
                 setPeriodo(atoi(code+1));
             }
             break;
-        case 'E':
+        case EFFECT_ID:
             parse_effect(code);
+            break;
+        case FONT_ID:
+            break;
+        case GAMES_ID:
             break;
     }
 }
@@ -147,5 +170,45 @@ void parse_effect(char* code)
     effect_launch(effects[effect_id]);
 }
 
+
+void parse_command(uint8_t message)
+{
+    switch(message){
+        case 'w':
+        case 'W':
+            current_command = FWD_COMMAND;
+            break;
+        case 's':
+        case 'S':
+            current_command = REV_COMMAND;
+            break;
+        case 'a':
+        case 'A':
+            current_command = LEFT_COMMAND;
+            break;
+        case 'd':
+        case 'D':
+            current_command = RIGHT_COMMAND;
+            break;
+        case 'o':
+        case 'O':
+            current_command = UP_COMMAND;
+            break;
+        case 'l':
+        case 'L':
+            current_command = DOWN_COMMAND;
+            break;
+        default:
+            current_command = NO_COMMAND;
+            break;
+    }
+}
+
+uint8_t getCommand(void)
+{   
+    uint8_t cmd = current_command;
+    current_command = NO_COMMAND;
+    return cmd; 
+}
 
 

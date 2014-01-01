@@ -5,17 +5,24 @@
 
 #include "font.h"
 
+static char message[MESSAGE_SIZE] = {"HELLO WORLD   "};
+
 // ----------------------------------- PROTOTIPOS -----------------------------------------
 
-void    putFont                 (uint8_t dim,   uint8_t coord,  uint8_t* character);
-void    putAscii                (uint8_t dim,   uint8_t coord,  char c);
-uint8_t getColumnFont           (uint8_t* c,    uint8_t column);
-void    effect_push_message     (char* message, uint8_t dim,    uint8_t space, uint8_t reset);
-void    effect_broadway_message (char* message, uint8_t reset);
-void    effect_slide_message    (char* message, uint8_t reset);
+void    putFont                             (uint8_t dim,   uint8_t coord,  uint8_t* character);
+void    putAscii                            (uint8_t dim,   uint8_t coord,  char c);
+uint8_t getColumnFont                       (uint8_t* c,    uint8_t column);
+void    font_effect_push_message            (uint8_t dim,    uint8_t space, uint8_t reset);
+
+void    font_effect_standard_push_message   (uint8_t reset);
+void    font_effect_broadway_message        (uint8_t reset);
+void    font_effect_slide_message           (uint8_t reset);
+
+void    setMessage                          (char* str);
 
 
 // ----------------------------------- FUNCIONES ------------------------------------------
+
 
 /* Nombre: putFont
  * Descripción: Funcion de activacion de un plano perpendicular al eje (X,Y,Z) del cubo con el caracter correspondiente
@@ -44,7 +51,7 @@ void putFont(uint8_t dim,  uint8_t coord, uint8_t* character)
         {
             for(y = 0; y < N; y++)
             {
-                putVoxel(coord,y,z,test(character[z],(N-1)-y));
+                putVoxel(coord,y,z,test(character[z],(N-1-y)));
             }
         }
     }
@@ -69,10 +76,11 @@ void putFont(uint8_t dim,  uint8_t coord, uint8_t* character)
 
 void putAscii(uint8_t dim, uint8_t coord, char c)
 {
-    putFont(dim,coord,ascii[c+0x20]);
+    if(c >= ASCII_OFFSET)
+        putFont(dim,coord,ascii[c-ASCII_OFFSET]);
 }
 
-/* Nombre: effect_push_message
+/* Nombre: font_effect_push_message
  * Descripción: Efecto de empujar un mensaje a traves del cubo
  * Argumentos: 
                 message - String del mensaje
@@ -81,14 +89,16 @@ void putAscii(uint8_t dim, uint8_t coord, char c)
                 reset   - variable de reinicializacion del efecto
  * Valor devuelto: Ninguno */ 
 
-void effect_push_message(char* message,uint8_t dim, uint8_t space,uint8_t reset)
+void font_effect_push_message(uint8_t dim, uint8_t space,uint8_t reset)
 {
     static uint8_t i = 0,c=0;
 
     if(reset)
     {
         i = c = 0;
-        putAscii(dim,N-1,message[c]);
+        clearCube();
+        return;
+        //putAscii(dim,N-1,message[c]);
     }
     
     if(dim != Z){
@@ -111,6 +121,11 @@ void effect_push_message(char* message,uint8_t dim, uint8_t space,uint8_t reset)
 
 }
 
+void font_effect_standard_push_message(uint8_t reset)
+{
+    font_effect_push_message(Y,5,reset);
+}
+
 /* Nombre: getColumnFont
  * Descripción: Funcion para obtener las columnas de las fuentes (necesario para effect_broadway_message)
  * Argumentos: 
@@ -130,14 +145,14 @@ uint8_t getColumnFont(uint8_t* c, uint8_t column)
     return config;
 }
 
-/* Nombre: effect_broadway_message
+/* Nombre: font_effect_broadway_message
  * Descripción: Efecto de retransimitir por las caras X=0, Y=0 y X= N-1 un mensaje
  * Argumentos: 
                 message - String del mensaje
                 reset   - variable de reinicializacion del efecto
  * Valor devuelto: Ninguno */ 
 
-void effect_broadway_message(char* message,uint8_t reset)
+void font_effect_broadway_message(uint8_t reset)
 {
     const uint8_t bufferSize = 22;
     static uint8_t buffer[22];
@@ -149,6 +164,7 @@ void effect_broadway_message(char* message,uint8_t reset)
         count = letter = 0;
         for(i = 0; i < bufferSize; i++)
             buffer[i] = 0x00;
+        clearCube();
         return;
     }
 
@@ -159,11 +175,13 @@ void effect_broadway_message(char* message,uint8_t reset)
     if(count >= N){
         count = 0;
         letter++;
-        if(message[letter-1] == '\0')
+        if(message[letter] == '\0')
             letter = 0;
     }
 
-    buffer[0] = getColumnFont(ascii[(int)message[letter]],count++);
+    buffer[0] = getColumnFont(ascii[(int)message[letter]-ASCII_OFFSET],count++);
+
+   
 
     //COPY TO CUBE
     // Cara X=0
@@ -188,13 +206,13 @@ void effect_broadway_message(char* message,uint8_t reset)
     // }
 }
 
-/* Nombre: effect_slide_message
+/* Nombre: font_effect_slide_message
  * Descripción: Efecto de mostrar de forma lateral un mensaje en los planos Y = 3 e Y = 4
                 message - String del mensaje
                 reset   - variable de reinicializacion del efecto
  * Valor devuelto: Ninguno */ 
 
-void effect_slide_message(char* message, uint8_t reset)
+void font_effect_slide_message(uint8_t reset)
 {
     static uint8_t buffer[8];
     static uint8_t count = 0,letter = 0;
@@ -205,6 +223,7 @@ void effect_slide_message(char* message, uint8_t reset)
         count = letter = 0;
         for(i = 0; i < N; i++)
             buffer[i] = 0x00;
+        clearCube();
         return;
     }
 
@@ -215,11 +234,11 @@ void effect_slide_message(char* message, uint8_t reset)
     if(count >= N){
         count = 0;
         letter++;
-        if(message[letter-1] == '\0')
+        if(message[letter] == '\0')
             letter = 0;
     }
 
-    buffer[0] = getColumnFont(ascii[(int)message[letter]],count++);
+    buffer[0] = getColumnFont(ascii[(int)message[letter]-ASCII_OFFSET],count++);
 
     //COPY TO CUBE
     for(i = 0; i < N ; i++)
@@ -228,6 +247,12 @@ void effect_slide_message(char* message, uint8_t reset)
         putAxis(Z,N-1-i,4,buffer[i]);
     }
 
+}
+
+
+void setMessage (char* str)
+{
+    strcpy(message,str);
 }
 
 

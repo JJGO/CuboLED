@@ -5,6 +5,9 @@
 #ifndef _FONT_H
 #define _FONT_H
 
+#define MESSAGE_SIZE 64
+#define ASCII_OFFSET 0x20
+
 #define _ASCII
 //#define _GREEK
 //#define _HIRAGANA
@@ -13,10 +16,11 @@
 
 #include "cubo.h"
 #include <stdint.h>
+#include <string.h>
 
 #ifdef _ASCII
 
-static const uint8_t ascii[128-32][8] = {
+static const uint8_t ascii[128-ASCII_OFFSET][8] = {
 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},       // U+0020 (space)
 {0x00, 0x18, 0x00, 0x18, 0x18, 0x3C, 0x3C, 0x18},       // U+0021 (!)
 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x36},       // U+0022 (")
@@ -377,12 +381,11 @@ static const uint8_t extlatin[96][8] = {
 {0x1F, 0x30, 0x3E, 0x33, 0x33, 0x00, 0x33, 0x00}};      // U+00FF (y umlaut)
 #endif
 
-void    putFont                 (uint8_t dim,   uint8_t coord,  uint8_t* character);
-void    putAscii                (uint8_t dim,   uint8_t coord,  char c);
-uint8_t getColumnFont           (uint8_t* c,    uint8_t column);
-void    effect_push_message     (char* message, uint8_t dim,    uint8_t space, uint8_t reset);
-void    effect_broadway_message (char* message, uint8_t reset);
-void    effect_slide_message    (char* message, uint8_t reset);
+void    font_effect_standard_push_message   (uint8_t reset);
+void    font_effect_broadway_message        (uint8_t reset);
+void    font_effect_slide_message           (uint8_t reset);
+
+void    setMessage                          (char* str);
 
 
 

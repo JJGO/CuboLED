@@ -294,13 +294,19 @@ void PWMCube(void)
 * Valor devuelto: Ninguno */
 
 void __attribute__((interrupt,no_auto_psv)) _T1Interrupt(void) {
+
+    // Monitor monolitico
+    // TODO - Poner flags virtuales y desplazar el procesamiento fuerte al main
+
     IFS0bits.T1IF=0; //limpieza del flag
-    Refresh();
-    
-    effect_launcher();
 
     EdgeDetect(SWITCH);
     watch_uart();
+
+    effect_launcher();
+    Refresh();
+    
+    
     
  }
 

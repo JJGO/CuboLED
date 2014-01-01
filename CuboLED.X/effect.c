@@ -1,11 +1,15 @@
+// Jose Javier Gonzalez Ortiz
+// Libreria para la definicion de efectos ejecutables por el CuboLED
+// effect.c
 
 #include "effect.h"
 
+// ------------------------------------ GLOBALES ------------------------------------------
 
-static peffect   current_effect;
-static uint16_t counter = 0;
-static uint16_t ticks_effect = 0;
-static uint16_t periodo_effect = 1000; //Periodo entre llamadas al efecto en milisegundos
+static peffect   current_effect;        // Puntero al efecto actual que se esta ejecutando
+static uint16_t counter = 0;            // Contador de iteraciones pendientes, si vale -1 es infinito
+static uint16_t ticks_effect = 0;       // Contador del timer para hacer la actualizacion de 
+static uint16_t periodo_effect = 1000;  //Periodo entre llamadas al efecto en milisegundos
 static uint8_t analog_period = true;
 static uint8_t analog_factor = 2;
 // ----------------------------------- PROTOTIPOS -----------------------------------------
@@ -13,8 +17,9 @@ static uint8_t analog_factor = 2;
 void        effect_launch               (peffect effect);
 void        effect_repeat               (peffect effect, uint8_t iterations);
 void        effect_quit                 (void);
-void        effect_empty(uint8_t a);
+void        effect_empty                (uint8_t a);
 void        effect_launcher             (void);
+
 uint16_t    getPeriodo                  (void);
 void        setPeriodo                  (uint16_t);
 void        setFactor                   (uint8_t factor);
@@ -23,33 +28,52 @@ void        draw_cube                   (uint8_t edge,uint8_t x,uint8_t y,uint8_
 void        ring                        (int l, int z);
 void        set_oblique                 (int d);
     
-void        effect_animate_cube         (uint8_t reset);
-void        effect_expand_cube          (uint8_t reset);
-void        effect_rain                 (uint8_t reset);
-void        effect_crossing_piramids    (uint8_t reset);
+void        effect_animate_cube         (uint8_t  reset);
+void        effect_expand_cube          (uint8_t  reset);
+void        effect_rain                 (uint8_t  reset);
+void        effect_crossing_piramids    (uint8_t  reset);
 void        effect_spin                 (uint8_t* config);
-void        random_fill                 (void);
+void        effect_random_fill          (uint8_t  reset);
+void        effect_sweep_plane          (uint8_t  reset);
+void        effect_random_move_axis     (uint8_t  reset);
 
 // ----------------------------------- FUNCIONES ------------------------------------------
+
+
+/*Nombre: effect_launch
+ * Descripcion: Resetea el efecto a lanzar y lo establece como el efecto actual de forma indefinida
+ * Argumentos: effect - puntero al efecto a ejecutar
+ * Valor devuelto: Ninguno*/
 
 void effect_launch(peffect effect)
 {
     analog_period = true;
-    analog_factor = 2;
+    analog_factor = FACTOR_DEF;
     (*effect)(true);      // resetea el efecto
     current_effect = effect;
     counter = -1;
 }
 
+/*Nombre: effect_repeat
+ * Descripcion: Resetea el efecto a lanzar y lo establece como el efecto actual un cantidad de iteraciones proporcionada
+ * Argumentos:  effect - puntero al efecto a ejecutar
+                iterations - numero de iteraciones que el efecto ejecutara
+ * Valor devuelto: Ninguno*/
+
 void effect_repeat(peffect effect, uint8_t iterations)
 {
     analog_period = true;
-    analog_factor = 2;
+    analog_factor = FACTOR_DEF;
     (*effect)(true);
     current_effect = effect;
     counter = iterations;
     
 }
+
+/*Nombre: effect_quit
+ * Descripcion: Sale del efecto actual y limpia el cubo LED
+ * Argumentos:  Ninguno
+ * Valor devuelto: Ninguno*/
 
 void effect_quit(void)
 {
@@ -57,16 +81,27 @@ void effect_quit(void)
     current_effect = &effect_empty;
 }
 
+/*Nombre: effect_empty
+ * Descripcion: Efecto vacio para poder tener al cubo en idle mode
+ * Argumentos:  Ninguno
+ * Valor devuelto: Ninguno*/
+
 void effect_empty(uint8_t a)
 {
     
 }
 
+/*Nombre: effect_empty
+ * Descripcion: Rutina de monitorizacion y ejecucion de los efectos, llama a los efectos y obtiene el periodo 
+                a partir del potenciometro si esta habilitado 
+ * Argumentos:  Ninguno
+ * Valor devuelto: Ninguno*/
+
 void effect_launcher(void)
 {
     ticks_effect++;
     if(analog_period)
-        periodo_effect = analog_factor*get_ad(5)+100; // si esta habilitado por el efecto el periodo es variable 
+        periodo_effect = analog_factor*get_ad(5)+TMIN; // si esta habilitado por el efecto el periodo es variable 
     if(ticks_effect >= periodo_effect)
     {
         ticks_effect = 0;
@@ -79,18 +114,35 @@ void effect_launcher(void)
     }
 }
 
+/*Nombre: getPeriodo
+ * Descripcion: Funcion de obtencion del periodo actual para el facil setup de DEMOS 
+ * Argumentos: Ninguno
+ * Valor devuelto: El valor actual de la variable periodo entre los efectos*/
+
 uint16_t getPeriodo(void)
 {
     return periodo_effect;
 }
 
+/*Nombre: setPeriodo
+ * Descripcion: Funcion de configuracion del periodo actual
+                Posee una validacion del periodo minimo para evitar la aparicion de patrones Moire 
+                Los cuales ocurren si periodo_effect < N * TREFRESH
+ * Argumentos: El valor a fijar del periodo 
+ * Valor devuelto: Ninguno*/
+
 void setPeriodo (uint16_t periodo)
 {
-    if(periodo>10){
+    if(periodo>TMIN){
         analog_period = false;
         periodo_effect = periodo;
     }
 }
+
+/*Nombre: setFactor
+ * Descripcion: Funcion de configuracion del factor de velocidad
+ * Argumentos: El valor a fijar del factor de velocidad aplicado a la lectura analogica
+ * Valor devuelto: Ninguno*/
 
 void setFactor(uint8_t factor)
 {
@@ -141,8 +193,10 @@ void effect_animate_cube(uint8_t reset)
 
     if(reset)
     {
+
         growing = true;
         i = j = x = y = z = 0;
+        clearCube();
         return;
     }
 
@@ -184,6 +238,7 @@ void effect_expand_cube(uint8_t reset)
     {
         size = 2;
         growing = true;
+        clearCube();
         return;
     }
 
@@ -268,6 +323,7 @@ void effect_crossing_piramids(uint8_t reset)
     if(reset)
     {   
         j = 0;
+        clearCube();
         return;
     }
 
@@ -344,12 +400,87 @@ void effect_spin(uint8_t* config)
 
 }
 
+void effect_sweep_plane(uint8_t reset)
+{
+    static uint8_t i,j;
+
+    if(reset)
+    {
+        i = j = 0;
+        clearCube();
+        return;
+    }
+
+    if(i>=N){
+        i = 0;
+        j++;
+        if(j>=6)
+        {
+            j=0;
+        }
+    }
+    clearCube();
+    fillPlane(j/2+1,j%2 ? N-1-i : i,0xff);
+
+    i++;
+}
 
 
-void random_fill(void)
+void effect_random_move_axis(uint8_t reset)
+{   
+    static int8_t x,y,z,dx,dy,dz,count;
+    if(reset)
+    {
+        x = rand()%N;
+        y = rand()%N;
+        z = rand()%N;
+        dx = (rand()%3-1);
+        dy = (rand()%3-1);
+        dz = (rand()%3-1);
+        count = 0;
+        clearCube();
+        return;
+    }   
+
+    if(count >= 20)
+    {
+        count = 0;
+        dx = (rand()%3-1);
+        dy = (rand()%3-1);
+        dz = (rand()%3-1);
+    }
+
+    if(!inrange(x+dx))
+        dx = -dx;
+    x = (x+dx);
+
+    if(!inrange(y+dy))
+        dy = -dy;
+    y = (y+dy);
+
+    if(!inrange(z+dz))
+        dz = -dz;
+    z = (z+dz);
+
+    clearCube();
+
+    setVoxel(x,y,z);
+
+    count++;
+
+
+}
+
+
+void effect_random_fill(uint8_t reset)
 {
     static int i = 0;
     uint8_t x,y,z;
+
+    if(reset)
+    {   
+        clearCube();
+    }
     
     while(i<512){
         x = mod(rand());
@@ -357,7 +488,7 @@ void random_fill(void)
         z = mod(rand());
         if(!voxel(x,y,z)){
             setVoxel(x,y,z);
-           i++;
+            i++;
         }
     }
 

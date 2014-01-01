@@ -12,17 +12,30 @@
 #include "cubo.h"
 #include "uart.h"       // Libreria para el manejo del modulo serie
 
+#define BUFFER_SIZE     64
+#define NUM_EFFECTS     30 
 
-#define EFFECTS_ID  'E'
-#define EFFECTS_NUM  30
-#define GAMES_ID    'G'
+#define EFFECT_ID       'E'
+#define FONT_ID         'F'
+#define GAMES_ID        'G'
 
-void initEffects(void);
-char watch_uart(void);
-void parse_message(char* code);
-void send_periodo(void);
-void parse_effect(char* code);
-void initEffects(void);
+#define NO_COMMAND      0 
+#define FWD_COMMAND     1
+#define REV_COMMAND     2 
+#define LEFT_COMMAND    3 
+#define RIGHT_COMMAND   4 
+#define UP_COMMAND      5 
+#define DOWN_COMMAND    6   
 
+
+//Declaracion de funciones publicas
+
+void    initEffects     (void);
+char    watch_uart      (void);
+void    parse_message   (char* code);
+void    send_periodo    (void);
+void    parse_effect    (char* code);
+void    parse_command   (uint8_t message);
+uint8_t getCommand      (void);
 
 #endif
