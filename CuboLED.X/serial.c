@@ -54,12 +54,14 @@ void initEffects(void)
     effects[16] = &effect_random_fill;
     effects[17] = &effect_cascade;
     effects[18] = &effect_random_move_vertical;
+    effects[19] = &effect_random_fragment;
+    effects[20] = &effect_wave;
+         
 
-    effects[20] = &font_effect_standard_push_message; 
-    effects[21] = &font_effect_broadway_message;      
-    effects[22] = &font_effect_slide_message;      
-
-    effects[25] = &game_snake;   
+    effects[25] = &game_snake;  
+    effects[26] = &font_effect_standard_push_message; 
+    effects[27] = &font_effect_broadway_message;      
+    effects[28] = &font_effect_slide_message;  
 
 }
 

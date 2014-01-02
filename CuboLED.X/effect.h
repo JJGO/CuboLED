@@ -52,6 +52,8 @@ void        effect_sweep_plane          (uint8_t  reset);
 void        effect_random_move          (uint8_t reset);
 void        effect_cascade              (uint8_t reset);
 void        effect_random_move_vertical (uint8_t reset);
+void        effect_random_fragment      (uint8_t reset);
+void        effect_wave                 (uint8_t reset);
 
 
 #endif

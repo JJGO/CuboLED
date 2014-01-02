@@ -4,6 +4,7 @@
 
 #include "effect.h"
 
+#define PI  3.1416f
 // ------------------------------------ GLOBALES ------------------------------------------
 
 static peffect   current_effect;         // Puntero al efecto actual que se esta ejecutando
@@ -15,6 +16,8 @@ static uint16_t  ticks_effect = 0;       // Contador del timer para hacer la act
 static uint16_t  periodo_effect = 1000;  //Periodo entre llamadas al efecto en milisegundos 
        uint8_t   analog_period = true;
 static uint8_t   factor = 2;
+
+
 // ----------------------------------- PROTOTIPOS -----------------------------------------
 
 void        effect_launch               (peffect effect);
@@ -41,10 +44,12 @@ void        effect_sweep_plane          (uint8_t  reset);
 void        effect_random_move          (uint8_t reset);
 void        effect_cascade              (uint8_t reset);
 void        effect_random_move_vertical (uint8_t reset);
+void        effect_random_fragment      (uint8_t reset);
 
 void        draw_cube                   (uint8_t edge,uint8_t x,uint8_t y,uint8_t z);
 void        ring                        (int l, int z);
 void        set_oblique                 (int d);
+void        effect_wave                 (uint8_t reset);
 
 
 // ----------------------------------- FUNCIONES ------------------------------------------
@@ -452,6 +457,7 @@ void effect_random_move_vertical(uint8_t reset)
             } 
         }
         leaps = N;
+        return;
     }
 
     if(leaps >= N-1)
@@ -461,44 +467,136 @@ void effect_random_move_vertical(uint8_t reset)
         y = rand()&0x07;
         up = getVoxel(x,y,0);
     }
-    // if(up){
-    //    putAxis(Z,x,y,getAxis(Z,x,y)<<1);
-    // }else{
-    //    putAxis(Z,x,y,getAxis(Z,x,y)>>1);
-    // }
     leaps++;
     putAxis(Z,x,y,0x00);
     setVoxel(x,y,up ? leaps :(N-1)-leaps);
-
-
 }
 
-/*
-//9 Pasar los LEDs de un lado al contrario de forma aleatoria
-void RandomMoveVertical(void)
+void effect_random_fragment(uint8_t reset)
 {
-    int i,j,axis,d;
-    for(i=0; i<=7; i++)
+    static uint8_t dim,up;
+    static int8_t steps;
+    uint8_t coord1,coord2,i;
+
+    if(reset)
     {
-        for(j=0; j<=7; j++)
-        {
-            axis=getAxis(Z,i,j);
-            if(test(axis,0)){
-                srand (time (NULL));
-                d=rand()%4;
-                if(d!=0)
-                   putAxis(Z,i,j, axis<<1);
-            }else if(test(axis,7));
-            else{
-                putAxis(Z,i,j, axis<<1);
-            }
+        clearCube();
+        dim = X;
+        up = true;
+        steps = 0;
+        fillPlane(dim,0,0xff);    //se rellena el plano
+    }
 
-
+    if(steps >= N-1)
+    {
+        steps = N-1;
+        up = 0;
+    }else if(steps <= 0 && up == 0){
+        steps = 0;
+        up = 1;
+        clearCube();
+        dim++;
+        if(dim > Z){
+            dim = X;
         }
+        fillPlane(dim,0,0xff);    //se rellena el plano
 
     }
+
+    if(up){
+        putPlane(dim,steps+1,getPlane(dim,steps));
+        fillPlane(dim,steps,0x00);
+        steps++;
+        for(i = 0; i < N;){
+            coord1 = rand()&0x07;
+            coord2 = rand()&0x07;
+            switch(dim){
+                case X:
+                    if(getVoxel(steps,coord1,coord2))
+                    {
+                        clearVoxel(steps,coord1,coord2);
+                        setVoxel(steps-1,coord1,coord2);
+                        i++;
+                    }
+                    break;
+                case Y:
+                    if(getVoxel(coord1,steps,coord2))
+                    {
+                        clearVoxel(coord1,steps,coord2);
+                        setVoxel(coord1,steps-1,coord2);
+                        i++;
+                    }
+                    break;
+                case Z:
+                    if(getVoxel(coord1,coord2,steps))
+                    {
+                        clearVoxel(coord1,coord2,steps);
+                        setVoxel(coord1,coord2,steps-1);
+                        i++;
+                    }
+                    break;
+            }
+        }
+       
+
+
+    }else{
+        for(coord1 = 0; coord1 < N; coord1++)
+        {
+            for(coord2 = 0; coord2 < N; coord2++)
+            {
+                switch(dim){
+                    case X:
+                        if(getVoxel(steps,coord1,coord2))
+                        {
+                            clearVoxel(steps,coord1,coord2);
+                            setVoxel(steps-1,coord1,coord2);
+                        }
+                        break;
+                    case Y:
+                        if(getVoxel(coord1,steps,coord2))
+                        {
+                            clearVoxel(coord1,steps,coord2);
+                            setVoxel(coord1,steps-1,coord2);
+                        }
+                        break;
+                    case Z:
+                        if(getVoxel(coord1,coord2,steps))
+                        {
+                            clearVoxel(coord1,coord2,steps);
+                            setVoxel(coord1,coord2,steps-1);
+                        }
+                        break;
+                }
+                
+            }
+        }
+        steps--;
+
+    }
+    
 }
-*/
+
+void effect_wave(uint8_t reset)
+{
+    static uint8_t t = 0;
+    const static uint8_t periodo = 16;
+    uint8_t i,s;
+    if(reset)
+    {
+        t=0;
+        clearCube();
+        return;
+    }
+    if(t >= periodo)
+    {
+        t = 0;
+    }
+    shiftCube(X,false,false);
+    s = (uint8_t)(3.5f*sin((2*PI)/periodo*t)+3.5f);
+    fillPlane(X,0,0x01<<s);
+    t++;
+}
 
 
 /*Nombre: effect_sweep_plane
