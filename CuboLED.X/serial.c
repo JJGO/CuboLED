@@ -15,22 +15,33 @@ static char buffer[BUFFER_SIZE];
 static char* pbuffer = buffer;
 
 // ----------------------------------- PROTOTIPOS -----------------------------------------
-void    initEffects     (void);
-char    watch_uart      (void);
-void    parse_message   (char* code);
-void    send_periodo    (void);
-void    parse_effect    (char* code);
-void    parse_command   (uint8_t message);
-uint8_t getCommand      (void);
-void    cleanBuffer     (void);
+void    initEffects             (void);
+char    watch_uart              (void);
+void    parse_message           (char* code);
+void    parse_effect            (char* code);
+void    parse_font_effect       (char* code);
+void    parse_command           (uint8_t message);
+void    parse_escape_command    (uint8_t message);
+uint8_t getCommand              (void);
+void    cleanBuffer             (void);
+    
+void    send_str                (char* str);
+void    send_int                (uint16_t i);
+void    send_hex                (uint16_t i);
+void    send_periodo            (void);
 
 // ----------------------------------- FUNCIONES ------------------------------------------
+
+/* Nombre: initEffects 
+ * Descripción: Inicializacion del diccionario de efectos
+ * Argumentos: Ninguno
+ * Valor devuelto: Ninguno */ 
 
 void initEffects(void)
 {   
     uint8_t i;
 
-    for(i=0; i<NUM_EFFECTS; i++)
+    for(i=0; i < NUM_EFFECTS; i++)
     {
         effects[i] = &effect_empty;
     }
@@ -39,7 +50,10 @@ void initEffects(void)
     effects[12] = &effect_rain;
     effects[13] = &effect_crossing_piramids;
     effects[14] = &effect_sweep_plane;
-    effects[15] = &effect_random_move_axis;
+    effects[15] = &effect_random_move;
+    effects[16] = &effect_random_fill;
+    effects[17] = &effect_cascade;
+    effects[18] = &effect_random_move_vertical;
 
     effects[20] = &font_effect_standard_push_message; 
     effects[21] = &font_effect_broadway_message;      
@@ -61,39 +75,61 @@ char watch_uart(void)
     //static int i = 0;
     
      
-    if (HayAlgoRecibido()) {
+    if (HayAlgoRecibido()) {                            // Mira si hay algo recibido
         mensaje = SacarDeColaRecepcionUART();
             //Operar Mensaje
 
-        if(echo)
+        if(echo)                                        // Si el echo esta activo repite lo recibido para la terminal de usuario
         {
             PonerEnColaTransmisionUART(mensaje);        //Realiza el eco de lo recibido
             Transmite();
         }
 
-        if(mensaje == 0x08) // Backspace
+        switch(mensaje)
         {
-            if(pbuffer-buffer > 0)
-            {
-                pbuffer--;
-            }
+            case 0x08:                                  // Backspace
+                if(pbuffer-buffer > 0)
+                {
+                    pbuffer--;                          // En caso de backspace retrocede el puntero
+                }
+                break;
+
+            case '\r':                                  // Si recibe el retorno de carro, envia nueva linea e interpreta el mensaje
+                PonerEnColaTransmisionUART('\n');
+                Transmite();
+                *pbuffer = '\0';
+                pbuffer = buffer; 
+                parse_message(buffer);
+                break;
+
+            case 'A':
+            case 'B':
+            case 'C':
+            case 'D':
+                if(pbuffer[-1] == '[' && pbuffer[-2] == ESC)
+                {
+                    parse_escape_command(mensaje);
+                }
+                break;
+
+            default:
+                *pbuffer++ = mensaje;                       // Si es un caracter normal, se copia en el buffer, y si rebosa lo resetea
+                if(pbuffer-buffer >BUFFER_SIZE){
+                    pbuffer = buffer; 
+                }
+                break;
         }
-        else if(mensaje == '\r') //Nueva linea
-        {
-            PonerEnColaTransmisionUART('\n');
-            Transmite();
-            *pbuffer = '\0';
-            pbuffer = buffer; //i = 0;
-            parse_message(buffer);
-        }else{
-            *pbuffer++ = mensaje;
-            if(pbuffer-buffer >BUFFER_SIZE)
-                pbuffer = buffer; //i = 0;
-        }
-        parse_command(mensaje);
+            parse_command(mensaje);                         // Comprueba si lo recibido es un comando 
+                                                        // TODO Condicionarlo a la ejecucion de un juego
+        return mensaje;                         
     }
-    return mensaje;
+    return '\0';
 }
+
+/* Nombre: parse_message
+ * Descripción: Función de interpretado de los codigos de operacion
+ * Argumentos: code - cadena que apunta al buffer de recepcion con el codigo de operacion
+ * Valor devuelto: Ninguno */ 
 
 void parse_message(char* code)
 {   
@@ -104,73 +140,36 @@ void parse_message(char* code)
         case 'Q':
             effect_quit();
             break;
+        case 'R':
+            effect_reset();
+            break;
         case 'N':
             //effect_next();
             break;
         case 'P':
             if(code[1] == 0){
-                send_periodo();
-            }else if(code[1] == 'A'){
-                analog_period = true;
+                send_periodo();                         // P : envia el perido actual
+            }else if(code[1] == 'A'){ 
+                analog_period = true;                   // PA : Reactiva el periodo analogico
             }else{
-                setPeriodo(atoi(code+1));
+                setPeriodo(atoi(code+1));               // PX : Pone el periodo a valor X 
             }
             break;
-        case EFFECT_ID:
+        case EFFECT_ID:                                 // EXX : Activa el efecto XX de forma indefinida
             parse_effect(code);
             break;
         case FONT_ID:
+            parse_font_effect(code);                    // FXX MMM.. : Activa el efecto XX de cadena con el mensaje MMM..
             break;
         case GAMES_ID:
             break;
     }
 }
 
-void send_int(uint8_t i)
-{
-
-    static const char mensaje[11] = {"0x"};
-    char periodoStr[64],*periodoPtr;
-    
-    PonerEnColaTransmisionUART('\r');
-    PonerEnColaTransmisionUART('\n');
-
-    periodoPtr = mensaje;
-    while(*periodoPtr)
-    {
-        PonerEnColaTransmisionUART(*periodoPtr++);
-    }
-    itoa(periodoStr,i,16);
-    periodoPtr = periodoStr;
-    while(*periodoPtr)
-    {
-        PonerEnColaTransmisionUART(*periodoPtr++);
-    }
-    PonerEnColaTransmisionUART('\r');
-    PonerEnColaTransmisionUART('\n');
-    Transmite();
-}
-
-void send_periodo(void)
-{
-    static const char mensaje[11] = {"Periodo = "};
-    char periodoStr[64],*periodoPtr;
-  
-    periodoPtr = mensaje;
-    while(*periodoPtr)
-    {
-        PonerEnColaTransmisionUART(*periodoPtr++);
-    }
-    itoa(periodoStr,(int)getPeriodo(),10);
-    periodoPtr = periodoStr;
-    while(*periodoPtr)
-    {
-        PonerEnColaTransmisionUART(*periodoPtr++);
-    }
-    PonerEnColaTransmisionUART('\r');
-    PonerEnColaTransmisionUART('\n');
-    Transmite();
-}
+/* Nombre: parse_effect
+ * Descripción: Funcion para lanzar e efecto asociado al codigo de operacion
+ * Argumentos: code - cadena que apunta al buffer de recepcion con el codigo de operacion
+ * Valor devuelto: Ninguno */ 
 
 void parse_effect(char* code)
 {
@@ -182,6 +181,28 @@ void parse_effect(char* code)
     
 }
 
+/* Nombre: parse_font_effect
+ * Descripción: Funcion para lanzar e efecto asociado al codigo de operacion
+ * Argumentos: code - cadena que apunta al buffer de recepcion con el codigo de operacion
+ * Valor devuelto: Ninguno */ 
+
+void parse_font_effect(char* code)
+{
+    code[3] = '\0';                         // Se coloca un caracter terminador para el correcto funcionamiento de atoi
+
+    uint8_t effect_id = atoi(code+1);    
+    if(effect_id < NUM_EFFECTS)
+    {
+        effect_launch(effects[effect_id]);
+    } 
+
+    setMessage(code+4);                     // Pone el mensaje 
+}
+
+/* Nombre: parse_command
+ * Descripción: Funcion de interpretado de mensajes a comandos
+ * Argumentos: message - el caracter del comando
+ * Valor devuelto: mensaje */ 
 
 void parse_command(uint8_t message)
 {
@@ -216,6 +237,38 @@ void parse_command(uint8_t message)
     }
 }
 
+/* Nombre: parse_escape_command
+ * Descripción: Funcion de interpretado de comandos de escape
+ * Argumentos: message - el caracter del comando
+ * Valor devuelto: mensaje */ 
+
+void parse_escape_command(uint8_t message)
+{
+    switch(message){
+        case 'A':
+            current_command = UP_KEY_COMMAND;
+            break;
+        case 'B':
+            current_command = DOWN_KEY_COMMAND;
+            break;
+        case 'C':
+            current_command = RIGHT_KET_COMMAND;
+            break;
+        case 'D':
+            current_command = LEFT_KEY_COMMAND;
+            break;
+        default:
+            current_command = NO_COMMAND;
+            break;
+    }
+}
+
+/* Nombre: getCommand
+ * Descripción: Devuelve el ultimo comando recibido y resetea el comando actual 
+                (para no tomar 2 veces el mismo comando)
+ * Argumentos: Ninguno
+ * Valor devuelto: El Codigo numerico del ultimo comando recibido */ 
+
 uint8_t getCommand(void)
 {   
     uint8_t cmd = current_command;
@@ -223,9 +276,69 @@ uint8_t getCommand(void)
     return cmd; 
 }
 
+/* Nombre: cleanBuffer
+ * Descripción: Resetea el buffer de recepcion 
+                (utilizado por juegos que reciben comandos y en vez de codigos de operacion)
+ * Argumentos: Ninguno
+ * Valor devuelto: Ninguno */ 
+
 void cleanBuffer (void)
 {
     pbuffer = buffer;
 }
+
+// ------------------------------ FUNCIONES AUXILIARES ------------------------------------
+
+/* Nombre: send_str
+ * Descripción: Funcion para el envio de una cadena 
+ * Argumentos: str - cadena que desea enviar
+ * Valor devuelto: Ninguno */ 
+void send_str(char* str)
+{
+
+    while(*str)
+    {
+        PonerEnColaTransmisionUART(*str++);
+    }
+    Transmite();
+}
+
+/* Nombre: send_int
+ * Descripción: Funcion para el envio de un numero entero decimal 
+ * Argumentos: i - numero a enviar
+ * Valor devuelto: Ninguno */
+void send_int(uint16_t i)
+{
+    static char str[6];
+    itoa(str,i,10);
+    send_str(str);
+}
+
+/* Nombre: send_hex
+ * Descripción: Funcion para el envio de un numero entero hexadecimal 
+ * Argumentos: i - numero a enviar
+ * Valor devuelto: Ninguno */
+void send_hex(uint16_t i)
+{  
+    static char str[6];
+    send_str("0x");
+    itoa(str,i,16);
+    send_str(str);
+}
+
+/* Nombre: send_periodo
+ * Descripción: Funcion para el envio del actual periodo entre efectos
+ * Argumentos: Ninguno
+ * Valor devuelto: Ninguno */
+void send_periodo(void)
+{
+    send_str("Periodo = ");
+    send_int(getPeriodo());
+    PonerEnColaTransmisionUART('\r');
+    PonerEnColaTransmisionUART('\n');
+    Transmite();
+}
+
+
 
 

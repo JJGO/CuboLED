@@ -10,9 +10,9 @@
 #include <stdint.h>       // para el uso de int8_t
 
 #define MAX_LENGTH  64
-#define MIN_LENGTH  3
-#define X_0         0
-#define Y_0         0
+#define MIN_LENGTH  4
+#define X_0         3
+#define Y_0         3
 #define Z_0         0
 
 // Definicion de funciones publicas

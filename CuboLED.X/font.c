@@ -11,14 +11,15 @@ static char message[MESSAGE_SIZE] = {"HELLO WORLD   "};
 
 void    putFont                             (uint8_t dim,   uint8_t coord,  uint8_t* character);
 void    putAscii                            (uint8_t dim,   uint8_t coord,  char c);
-uint8_t getColumnFont                       (uint8_t* c,    uint8_t column);
-void    font_effect_push_message            (uint8_t dim,    uint8_t space, uint8_t reset);
+void    setMessage                          (char* str);
 
+void    font_effect_push_message            (uint8_t dim,    uint8_t space, uint8_t reset);
 void    font_effect_standard_push_message   (uint8_t reset);
 void    font_effect_broadway_message        (uint8_t reset);
 void    font_effect_slide_message           (uint8_t reset);
 
-void    setMessage                          (char* str);
+
+uint8_t getColumnFont                       (uint8_t* c,    uint8_t column);
 
 
 // ----------------------------------- FUNCIONES ------------------------------------------
@@ -82,9 +83,7 @@ void putAscii(uint8_t dim, uint8_t coord, char c)
 
 /* Nombre: font_effect_push_message
  * Descripción: Efecto de empujar un mensaje a traves del cubo
- * Argumentos: 
-                message - String del mensaje
-                dim     - dimension en la que enviar el mensaje (X,Y,Z)
+ * Argumentos:  dim     - dimension en la que enviar el mensaje (X,Y,Z)
                 space   - separacion entre las letras
                 reset   - variable de reinicializacion del efecto
  * Valor devuelto: Ninguno */ 
@@ -121,35 +120,35 @@ void font_effect_push_message(uint8_t dim, uint8_t space,uint8_t reset)
 
 }
 
+/* Nombre: setMessage
+ * Descripción: Funcion auxiliar para modificar el mensaje que sacan los efectos de cadena font_effect_
+ * Argumentos:  str - nueva cadena a copiar en el mensaje
+ * Valor devuelto: Ninguno */ 
+
+
+void setMessage (char* str)
+{
+    uint8_t l = strlen(str);
+    strcpy(message,str);
+    message[l] = ' ';       // termianting character se pasa a espacio
+    message[l+1] = '\0';    // Se añade un termianting character 
+}
+
+// ------------------------------------ EFECTOS -------------------------------------------
+
+/* Nombre: font_effect_push_standard_message
+ * Descripción: Efecto de empujar un mensaje a traves del cubo
+ * Argumentos:  reset   - variable de reinicializacion del efecto
+ * Valor devuelto: Ninguno */ 
+
 void font_effect_standard_push_message(uint8_t reset)
 {
     font_effect_push_message(Y,5,reset);
 }
 
-/* Nombre: getColumnFont
- * Descripción: Funcion para obtener las columnas de las fuentes (necesario para effect_broadway_message)
- * Argumentos: 
-                c       - Fuente del tipo char[8]
-                column  - columna a obtener
- * Valor devuelto: config - configuracion de la columna pedida */ 
-
-uint8_t getColumnFont(uint8_t* c, uint8_t column)
-{
-    uint8_t config = 0,i;
-    for(i = 0; i < N; i++)
-    {
-        if(test(c[i],column)){
-            set(config,i);
-        }
-    }
-    return config;
-}
-
 /* Nombre: font_effect_broadway_message
  * Descripción: Efecto de retransimitir por las caras X=0, Y=0 y X= N-1 un mensaje
- * Argumentos: 
-                message - String del mensaje
-                reset   - variable de reinicializacion del efecto
+ * Argumentos: reset   - variable de reinicializacion del efecto
  * Valor devuelto: Ninguno */ 
 
 void font_effect_broadway_message(uint8_t reset)
@@ -168,10 +167,12 @@ void font_effect_broadway_message(uint8_t reset)
         return;
     }
 
+    // Desplaza el buffer
     for(i = bufferSize-2; i < bufferSize; i--){
         buffer[i+1] = buffer[i];
     }
 
+    //Comprueba el cambio de letra y reinicializacion del mensaje
     if(count >= N){
         count = 0;
         letter++;
@@ -208,8 +209,7 @@ void font_effect_broadway_message(uint8_t reset)
 
 /* Nombre: font_effect_slide_message
  * Descripción: Efecto de mostrar de forma lateral un mensaje en los planos Y = 3 e Y = 4
-                message - String del mensaje
-                reset   - variable de reinicializacion del efecto
+ * Argumentos:  reset   - variable de reinicializacion del efecto
  * Valor devuelto: Ninguno */ 
 
 void font_effect_slide_message(uint8_t reset)
@@ -240,7 +240,6 @@ void font_effect_slide_message(uint8_t reset)
 
     buffer[0] = getColumnFont(ascii[(int)message[letter]-ASCII_OFFSET],count++);
 
-    //COPY TO CUBE
     for(i = 0; i < N ; i++)
     {
         putAxis(Z,N-1-i,3,buffer[i]);
@@ -250,12 +249,26 @@ void font_effect_slide_message(uint8_t reset)
 }
 
 
-void setMessage (char* str)
+
+
+// ---------------- FUNCIONES AUXILIARES PARA LA CREACION DE EFECTOS ----------------------
+
+/* Nombre: getColumnFont
+ * Descripción: Funcion para obtener las columnas de las fuentes (necesario para effect_broadway_message)
+ * Argumentos:  c       - Fuente del tipo char[8]
+                column  - columna a obtener
+ * Valor devuelto: config - configuracion de la columna pedida */ 
+
+uint8_t getColumnFont(uint8_t* c, uint8_t column)
 {
-    strcpy(message,str);
+    uint8_t config = 0,i;
+    for(i = 0; i < N; i++)
+    {
+        if(test(c[i],column)){
+            set(config,i);
+        }
+    }
+    return config;
 }
-
-
-
 
 

@@ -5,8 +5,6 @@
 
 #include "snake.h"
 
-#define GOM_LENGTH  13
-
 // ------------------------------------ GLOBALES ------------------------------------------
 
 static point head,food;
@@ -14,6 +12,7 @@ static point snake[MAX_LENGTH];
 
 static uint8_t game_over = false;
 static point cmd2dir[NUM_COMMAND];
+static uint8_t snake_length = MIN_LENGTH;
 
 
 // ----------------------------------- PROTOTIPOS -----------------------------------------
@@ -22,9 +21,14 @@ void    init_snake      (void);
 void    game_snake      (uint8_t reset);
 void    effect_snake    (uint8_t reset);
 void    set_food        (void);
-//void    getNewTail  (void);
 
 // ----------------------------------- FUNCIONES ------------------------------------------
+
+/* Nombre: init_snake
+ * Descripción: Funcion de incializacion del diccionario para pasar de comandos a vectores de direccion
+ * Argumentos: Ninguno
+ * Valor devuelto: Ninguno */
+
 void init_snake(void)
 {
     cmd2dir[FWD_COMMAND  ] = Point( 0,  1,  0);
@@ -36,10 +40,15 @@ void init_snake(void)
 
 }
 
+/* Nombre: game_snake
+ * Descripción: Juego del snake, formando por subefectos que se lanzan de forma secundaria
+ * Argumentos: reset   - variable de reinicializacion del efecto
+ * Valor devuelto: Ninguno */
+
 void game_snake(uint8_t reset)
 {
     static uint8_t estado = 0;
-
+    char str[2];
 
     if(reset)
     {
@@ -52,14 +61,20 @@ void game_snake(uint8_t reset)
     switch(estado)
     {
         case 1:
-            setMessage("3 2 1 ");
-            effect_launch_second(&font_effect_standard_push_message,N*5);
+            setMessage("3 2 1");
+            effect_launch_second(&font_effect_standard_push_message,6*6);
             break;
         case 2: 
             effect_launch_second(&effect_snake,-1);
             break;
         case 3:
-            effect_launch_second(&font_effect_slide_message,(GOM_LENGTH)*N);
+            setMessage("GAME OVER");
+            effect_launch_second(&font_effect_slide_message,(10)*N);
+            break;
+        case 4:
+            itoa(str,snake_length-MIN_LENGTH,10);
+            setMessage(str);
+            effect_launch_second(&font_effect_broadway_message,-1);
             break;
         default:
             effect_quit();
@@ -69,12 +84,16 @@ void game_snake(uint8_t reset)
 }
 
 
+/* Nombre: effect_snake
+ * Descripción: efecto del snake como tal, llamado por game_snake
+ * Argumentos: reset   - variable de reinicializacion del efecto
+ * Valor devuelto: Ninguno */
+
 void effect_snake(uint8_t reset)
 {
     
-    static uint8_t snake_length;
+    
     static point direction;
-    static char game_over_msg[GOM_LENGTH] = {"GAME OVER "};
     uint8_t i;
     
     uint8_t command;
@@ -86,10 +105,11 @@ void effect_snake(uint8_t reset)
         snake_length = MIN_LENGTH;
 
 
-        for(i = 0; i<snake_length; i--)
+        for(i = 0; i < snake_length; i--)
         {
             snake[i] = Point(X_0,Y_0,Z_0+snake_length-1-i);
             setPoint(snake[i]);
+            // TODO averiguar porque solo se enciende la cabeza
         }
         direction = cmd2dir[UP_COMMAND];            // direccion +Z
         set_food();
@@ -145,23 +165,22 @@ void effect_snake(uint8_t reset)
     }
     snake[0] = head;
 
-    setPoint(food);
+    setPoint(food);         // TODO Se debe poner debido a un error que hacia que en algunos casos la food no se iluminase
     
     // Si se ha acabado el juego
     if(game_over)
     {
         echo = true;
         cleanBuffer();
-
-        game_over_msg[GOM_LENGTH-1]= ' ';
-        game_over_msg[GOM_LENGTH-2]= (snake_length - MIN_LENGTH)%10+'0';
-        game_over_msg[GOM_LENGTH-3]= (snake_length - MIN_LENGTH)/10+'0';
-        setMessage(game_over_msg);
         setPeriodo(1000);
         effect_second_quit();
-        //effect_repeat(&font_effect_slide_message,(GOM_LENGTH)*N);
     }
 }
+
+/* Nombre: set_food
+ * Descripción: Funcion auxiliar para obtener la posicion de una nueva comida
+ * Argumentos:  Ninguno
+ * Valor devuelto: Ninguno */ 
 
 void set_food(void)
 {

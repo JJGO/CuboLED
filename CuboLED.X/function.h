@@ -34,12 +34,12 @@
 
 #define inrange(a)  ((a) == ((a) & 0x07))
 
-//Declaracion de estructuras
+//Declaracion de estructuras 
 
-//nombre puro de la estructura point
+    //nombre puro de la estructura point
 struct pointTag;
 
-//Typedef para evitar el keyword struct cada vez que haya una ocurrencia de point
+    //Typedef para evitar el keyword struct cada vez que haya una ocurrencia de point
 typedef struct pointTag
 {
     int8_t x;
