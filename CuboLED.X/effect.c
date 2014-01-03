@@ -51,7 +51,6 @@ void        effect_water_drop           (uint8_t  reset);
 void        effect_water_drop_2         (uint8_t  reset);
 void        effect_spiral               (uint8_t  reset);
 void        effect_lysa3d               (uint8_t  reset);
-void        effect_test                 (uint8_t  reset);
 void        effect_octahedron           (uint8_t  reset);
 void        effect_diagonal             (uint8_t  reset);
 
@@ -300,16 +299,17 @@ void effect_draw_cube(uint8_t reset)
 void effect_animate_cube(uint8_t reset)
 {
 
-    static int x = 0, y = 0, z = 0;
-    static int i = 0, j = 0;
-    static char growing = true;
-    const char min = 3,max = 8;
+    static uint8_t x = 0, y = 0, z = 0;
+    static uint8_t i = 0, j = 0;
+    static uint8_t growing = true;
+    const uint8_t min = 3,max = 8;
 
     if(reset)
     {
 
-        growing = true;
-        i = j = x = y = z = 0;
+        growing = false;
+        j = x = y = z = 0;
+        i = N;
         clearCube();
         return;
     }
@@ -550,18 +550,18 @@ void effect_random_fragment(uint8_t reset)
 
     if(steps >= N-1)
     {
-        steps = N-1;
-        up = 0;
-    }else if(steps <= 0 && up == 0){
         steps = 0;
-        up = 1;
-        clearCube();
-        dim++;
-        if(dim > Z){
-            dim = X;
+        if(up){
+            up = 0;
+        }else{
+            up = 1;
+            clearCube();
+            dim++;
+            if(dim > Z){
+                dim = X;
+            }
+            fillPlane(dim,0,0xff);    //se rellena el plano
         }
-        fillPlane(dim,0,0xff);    //se rellena el plano
-
     }
 
     if(up){
@@ -609,21 +609,21 @@ void effect_random_fragment(uint8_t reset)
                         if(getVoxel(steps,coord1,coord2))
                         {
                             clearVoxel(steps,coord1,coord2);
-                            setVoxel(steps-1,coord1,coord2);
+                            setVoxel(steps+1,coord1,coord2);
                         }
                         break;
                     case Y:
                         if(getVoxel(coord1,steps,coord2))
                         {
                             clearVoxel(coord1,steps,coord2);
-                            setVoxel(coord1,steps-1,coord2);
+                            setVoxel(coord1,steps+1,coord2);
                         }
                         break;
                     case Z:
                         if(getVoxel(coord1,coord2,steps))
                         {
                             clearVoxel(coord1,coord2,steps);
-                            setVoxel(coord1,coord2,steps-1);
+                            setVoxel(coord1,coord2,steps+1);
                         }
                         break;
                 }
@@ -661,7 +661,7 @@ void effect_wave(uint8_t reset)
 void effect_water_drop(uint8_t reset)
 {
     static float t = 0;
-    const static uint16_t periodo = 8;
+    const static uint16_t periodo = 8; //NO TOCAR
     uint8_t x,y,s;
     if(reset)
     {
@@ -675,28 +675,32 @@ void effect_water_drop(uint8_t reset)
     }
     
     clearCube();
-    for(x=0;x <N;x++)
+    for(x=0;x <N/2;x++)
     {
-        for(y = 0; y <N ;y++)
+        for(y = 0; y <N/2 ;y++)
         {
             s = (uint8_t)floor(3.5f*sinf((2.0f*PI)/periodo*(t+sqrt((x-3.5f)*(x-3.5f)+(y-3.5f)*(y-3.5f))))+3.5f+0.5f);
             setVoxel(x,y,s);
+            setVoxel(N-1-x,y,s);
+            setVoxel(x,N-1-y,s);
+            setVoxel(N-1-x,N-1-y,s);
             // s = (uint8_t)floor(3.5f*sinf((2.0f*PI)/periodo*(t+0.25+sqrt((x-3.5f)*(x-3.5f)+(y-3.5f)*(y-3.5f))))+3.5f+0.5f);
             // setVoxel(x,y,s);
         }
     }
-    t+=0.25;
+    t+=0.25f;
 }
 
 void effect_water_drop_2(uint8_t reset)
 {
-    static uint8_t t = 0;
-    const static uint8_t periodo = 32;
+    static float t = 0;
+    const static uint8_t periodo = 16;
     uint8_t x,y,s;
     if(reset)
     {
         t=0;
         clearCube();
+        setFactor(1);
         return;
     }
     if(t >= periodo)
@@ -707,14 +711,15 @@ void effect_water_drop_2(uint8_t reset)
     clearCube();
     for(x=0;x <N;x++)
     {
-        for(y = 0; y <N ;y++)
+        for(y = 0; y <=x ;y++)
         {
              s = (uint8_t)floor(3.5f*sinf((2.0f*PI)/periodo*(t+(x+y)))+3.5f+0.5f);
              setVoxel(x,y,s);
+             setVoxel(y,x,s);
             //putAxis(Z,x,y,s<<0x01);
         }
     }
-    t++;
+    t+=0.5f;
 }
 
 void effect_spiral(uint8_t reset)
@@ -903,62 +908,88 @@ void effect_spin(uint8_t* config)
 
 void effect_octahedron(uint8_t reset)
 {
-    static int8_t z;
+    static int8_t z,down;
     uint8_t x,y;
     if(reset)
     {
         z = N;
+        down = true;
         clearCube();
         return;
     }
-
-    for(x = 0; x < N; x++)
+    if(down)
     {
-        for(y = 0; y < N; y++)
-        {
-            // if(abs(x-3.5f)+abs(y-3.5f)+abs(z-3.5f)== 3.0f)
-            // {
-            //     setVoxel(x,y,z);
-            // }
-            cleanLayer(z);
-            if(abs(x-3.0f)+abs(y-3.0f)+abs(z-3.0f)== 3.0f)
-            {
-                setVoxel(x,y,z);
-            }
-            if(abs(x-3.0f)+abs(y-3.0f)+abs(z-1-3.0f) > 3.0f)
-            {
-                setVoxel(x,y,z-1);
-            }
+       clearLayer(z);
+       setLayer(z-1);
+       for(x = 0; x < N; x++)
+       {
+           for(y = 0; y < N; y++)
+           {   
+               if(abs(x-4.0f)+abs(y-4.0f)+abs(z-4.0f) <= 3.0f)
+               {
+                   setVoxel(x,y,z);
+               }
+               // if(abs(x-3.0f)+abs(y-3.0f)+abs(z-1-4.0f) > 3.0f)
+               // {
+               //     setVoxel(x,y,z-1);
+               // }
+           }
+       }
+       
+       z--;
+       if(z < -3)
+       {
+            z = N-1;
+            down = false;
+       } 
+    }else{
+        fillPlane(X,z,0x00);
+        fillPlane(X,z-1,0xff);
+        // for(x = 0; x < N; x++)
+        // {
+        //     for(y = 0; y < N; y++)
+        //     {
+        //         if(abs(x-3.0f)+abs(y-3.0f)+abs(z+1-4.0f) > 3.0f)
+        //         {
+        //             setVoxel(x,y,z+1);
+        //         }
+        //     }
+        // }
+        z--;
+        if(z < 0){
+            effect_octahedron(true);
         }
     }
     
-    z--;
-    if(z < 0)
-    {
-        effect_octahedron(true);
-    }
 }
 
 void effect_diagonal(uint8_t reset)
 {
-    static uint8_t t;
+    static uint8_t t,on;
+    uint8_t x,z;
 
     if(reset)
     {
+        clearCube();
+        on =true;
         t = 0;
         return;
     }
-
-    for(z = 0 ; z < min(t,N) ; z++)
+    for(z = 0 ; z < N ; z++)
     {
-        for(x = 0 ; x < min(z,N) ; x++)
+        for(x = 0 ; x <= N ; x++)
         {
-            setVoxel(x-z,t-x+z,z);
+            if(t >= x+z)
+            {
+                putVoxel(x,t-z-x,z,on);
+            }
+            
         }
     }
     t++;
-    if(t >= 22){
-        effect_diagonal(true);
+    if(t > 22){
+        t=0;
+        on = !on;
     }
 }
 

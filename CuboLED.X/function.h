@@ -8,7 +8,6 @@
 
 #include "cubo.h"
 
-
 // Macros para operar sobre el CuboLED de forma directa
 
 #define setV(a,b,c)     (voxel[c][b] |= (0x01) << a)

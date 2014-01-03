@@ -6,11 +6,11 @@
 #define _SERIAL_H
 
 //Librerias utilizadas
-#include <stdint.h>     // Para el uso de uint8_t
-#include <stdlib.h>     // Para atoi
+#include <stdint.h>         // Para el uso de uint8_t
+#include <stdlib.h>         // Para atoi
 
 #include "cubo.h"
-#include "uart.h"       // Libreria para el manejo del modulo serie
+#include "uart.h"           // Libreria para el manejo del modulo serie
 
 #define ESC                 0x1B
 

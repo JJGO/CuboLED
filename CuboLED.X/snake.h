@@ -7,7 +7,7 @@
 
 //Librerias utilizadas 
 #include "cubo.h"
-#include <stdint.h>       // para el uso de int8_t
+
 
 #define MAX_LENGTH  64
 #define MIN_LENGTH  4

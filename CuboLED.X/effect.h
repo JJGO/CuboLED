@@ -7,13 +7,13 @@
 
 //Librerias utilizadas 
 #include "cubo.h"                       // Libreria base para interactuar con el cubo. Incluye tambien function.h
-// #include <stdint.h>                     // para el uso de int8_t
 #include <stdlib.h>                     // Para la generacion de algoritmos pseudo-aleatorios
 #include <math.h>                       // Para el uso de funciones matematicas
 
 //Librerias externas de efectos
 #include "font.h"                       // Libreria de efectos con cadenas de caracteres alfanumericos
 #include "snake.h"                      // Libreria de juegos 
+#include "life.h"
 
 #define TMIN            N*TREFRESH
 #define FACTOR_DEF      2
@@ -59,7 +59,6 @@ void        effect_water_drop           (uint8_t  reset);
 void        effect_water_drop_2         (uint8_t  reset);
 void        effect_spiral               (uint8_t  reset);
 void        effect_lysa3d               (uint8_t  reset);
-void        effect_test                 (uint8_t  reset);
 void        effect_octahedron           (uint8_t  reset);
 void        effect_diagonal             (uint8_t  reset);
 

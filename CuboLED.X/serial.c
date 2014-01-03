@@ -49,7 +49,6 @@ void initEffects(void)
     effects[6] = &effect_diagonal;
     effects[7] = &effect_octahedron;
     effects[8] = &effect_draw_cube;
-    effects[9] = &effect_test;
 
     effects[10] = &effect_animate_cube;
     effects[11] = &effect_expand_cube;
@@ -68,9 +67,10 @@ void initEffects(void)
     effects[24] = &effect_lysa3d;
          
     effects[25] = &game_snake;  
-    effects[26] = &font_effect_standard_push_message; 
-    effects[27] = &font_effect_broadway_message;      
-    effects[28] = &font_effect_slide_message;  
+    effects[26] = &game_of_life;
+    effects[27] = &font_effect_standard_push_message; 
+    effects[28] = &font_effect_broadway_message;      
+    effects[29] = &font_effect_slide_message;  
 
 }
 

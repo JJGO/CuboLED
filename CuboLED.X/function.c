@@ -484,32 +484,3 @@ point getRandomPoint(void)
     return Point(rand()&0x07,rand()&0x07,rand()&0x07);
 }
 
-uint8_t count_neighboors(uint8_t x, uint8_t y, uint8_t z)
-{
-    uint8_t neighboors=0;
-    int8_t dx, dy, dz;
-    for(dx = -1; dx < 2 ; dx++)
-    {
-        if(inrange(x+dx))
-        {
-            for(dy = -1; dy < 2 ; dy++)
-            {
-                if(inrange(y+dy))
-                {
-                    for(dz = -1; dz < 2 ; dz++)
-                    {
-                        if(inrange(z+dz))
-                        {
-                            if(dx != 0 || dy != 0 || dz!= 0)
-                            {
-                                neighboors += getVoxel(x+dx,y+dy,z+dz);
-                            }
-                            
-                        }
-                    }   
-                }
-            }    
-        }
-    }
-    return neighboors;
-}
