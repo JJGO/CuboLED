@@ -34,6 +34,7 @@ uint16_t    getPeriodo                  (void);
 void        setPeriodo                  (uint16_t);
 void        setFactor                   (uint8_t factor);
 
+void        effect_draw_cube            (uint8_t  reset);
 void        effect_animate_cube         (uint8_t  reset);
 void        effect_expand_cube          (uint8_t  reset);
 void        effect_rain                 (uint8_t  reset);
@@ -41,15 +42,25 @@ void        effect_crossing_piramids    (uint8_t  reset);
 void        effect_spin                 (uint8_t* config);
 void        effect_random_fill          (uint8_t  reset);
 void        effect_sweep_plane          (uint8_t  reset);
-void        effect_random_move          (uint8_t reset);
-void        effect_cascade              (uint8_t reset);
-void        effect_random_move_vertical (uint8_t reset);
-void        effect_random_fragment      (uint8_t reset);
+void        effect_random_move          (uint8_t  reset);
+void        effect_cascade              (uint8_t  reset);
+void        effect_random_move_vertical (uint8_t  reset);
+void        effect_random_fragment      (uint8_t  reset);
+void        effect_wave                 (uint8_t  reset);
+void        effect_water_drop           (uint8_t  reset);
+void        effect_water_drop_2         (uint8_t  reset);
+void        effect_spiral               (uint8_t  reset);
+void        effect_lysa3d               (uint8_t  reset);
+void        effect_test                 (uint8_t  reset);
+void        effect_octahedron           (uint8_t  reset);
+void        effect_diagonal             (uint8_t  reset);
+
 
 void        draw_cube                   (uint8_t edge,uint8_t x,uint8_t y,uint8_t z);
 void        ring                        (int l, int z);
 void        set_oblique                 (int d);
-void        effect_wave                 (uint8_t reset);
+
+
 
 
 // ----------------------------------- FUNCIONES ------------------------------------------
@@ -227,6 +238,58 @@ void setFactor(uint8_t f)
 
 // ------------------------------------ EFECTOS -------------------------------------------
 
+void effect_draw_cube(uint8_t reset)
+{
+    static uint8_t t,stage,on;
+    if(reset)
+    {
+        t = 0;
+        on = 1;
+        stage = 0;
+        clearCube();
+        return;
+    }
+    if(t >= N)
+    {
+        t=0;
+        stage++;
+        if(stage >= 3){
+            stage = 0;
+            on = !on;
+        }
+        if(stage)
+            t=1;
+    }
+    switch(stage)
+    {
+        case 0:
+            putVoxel(   t,   0,   0,on);
+            putVoxel(   0,   t,   0,on);
+            putVoxel(   0,   0,   t,on);
+            break;
+        case 1:
+            putVoxel(   t, N-1,   0,on);
+            putVoxel(   t, 0  , N-1,on);
+
+            putVoxel( N-1,   t,   0,on);
+            putVoxel( 0  ,   t, N-1,on);
+
+            putVoxel( N-1,   0,   t,on);
+            putVoxel( 0  , N-1,   t,on);
+            break;
+        case 2:
+            putVoxel(   t, N-1, N-1,on);
+            putVoxel( N-1,   t, N-1,on);
+            putVoxel( N-1, N-1,   t,on);
+            break;
+    }
+
+
+
+    t++;
+
+}
+
 
 /*Nombre: effect_animate_cube
  * Descripcion: Ejecuta un efecto que consiste en expandir y comprimir un cubo de forma aleatoria contra las esquinas
@@ -396,9 +459,6 @@ void effect_rain(uint8_t reset)
 
 }
 
-
-
-
 /*Nombre: effect_crossing_piramids
  * Descripcion: Ejecuta un efecto de piramides que se desplazan y se cruzan en el eje Z 
                 requiere de ring() 
@@ -485,6 +545,7 @@ void effect_random_fragment(uint8_t reset)
         up = true;
         steps = 0;
         fillPlane(dim,0,0xff);    //se rellena el plano
+        return;
     }
 
     if(steps >= N-1)
@@ -537,8 +598,6 @@ void effect_random_fragment(uint8_t reset)
                     break;
             }
         }
-       
-
 
     }else{
         for(coord1 = 0; coord1 < N; coord1++)
@@ -571,9 +630,9 @@ void effect_random_fragment(uint8_t reset)
                 
             }
         }
-        steps--;
-
+        steps++;
     }
+    
     
 }
 
@@ -581,7 +640,7 @@ void effect_wave(uint8_t reset)
 {
     static uint8_t t = 0;
     const static uint8_t periodo = 16;
-    uint8_t i,s;
+    uint8_t s;
     if(reset)
     {
         t=0;
@@ -593,11 +652,132 @@ void effect_wave(uint8_t reset)
         t = 0;
     }
     shiftCube(X,false,false);
-    s = (uint8_t)(3.5f*sin((2*PI)/periodo*t)+3.5f);
+    s = (uint8_t)floor(3.5f*sinf((2.0f*PI)/periodo*(t))+3.5f+0.5f);
     fillPlane(X,0,0x01<<s);
     t++;
 }
 
+
+void effect_water_drop(uint8_t reset)
+{
+    static float t = 0;
+    const static uint16_t periodo = 8;
+    uint8_t x,y,s;
+    if(reset)
+    {
+        t=0;
+        clearCube();
+        return;
+    }
+    if(t >= periodo)
+    {
+        t = 0;
+    }
+    
+    clearCube();
+    for(x=0;x <N;x++)
+    {
+        for(y = 0; y <N ;y++)
+        {
+            s = (uint8_t)floor(3.5f*sinf((2.0f*PI)/periodo*(t+sqrt((x-3.5f)*(x-3.5f)+(y-3.5f)*(y-3.5f))))+3.5f+0.5f);
+            setVoxel(x,y,s);
+            // s = (uint8_t)floor(3.5f*sinf((2.0f*PI)/periodo*(t+0.25+sqrt((x-3.5f)*(x-3.5f)+(y-3.5f)*(y-3.5f))))+3.5f+0.5f);
+            // setVoxel(x,y,s);
+        }
+    }
+    t+=0.25;
+}
+
+void effect_water_drop_2(uint8_t reset)
+{
+    static uint8_t t = 0;
+    const static uint8_t periodo = 32;
+    uint8_t x,y,s;
+    if(reset)
+    {
+        t=0;
+        clearCube();
+        return;
+    }
+    if(t >= periodo)
+    {
+        t = 0;
+    }
+    
+    clearCube();
+    for(x=0;x <N;x++)
+    {
+        for(y = 0; y <N ;y++)
+        {
+             s = (uint8_t)floor(3.5f*sinf((2.0f*PI)/periodo*(t+(x+y)))+3.5f+0.5f);
+             setVoxel(x,y,s);
+            //putAxis(Z,x,y,s<<0x01);
+        }
+    }
+    t++;
+}
+
+void effect_spiral(uint8_t reset)
+{
+    static uint8_t t = 0;
+    const static uint8_t periodo = 32;
+    uint8_t s,c,z;
+    if(reset)
+    {
+        t=0;
+        clearCube();
+        return;
+    }
+    if(t >= periodo)
+    {
+        t = 0;
+    }
+    
+    
+    for(z=0;z<N;z++)
+    {
+
+        s = (uint8_t)floor(3.5f*sinf((2.0f*PI)/periodo*(t+z))+3.5f+0.5f);
+        c = (uint8_t)floor(3.5f*cosf((2.0f*PI)/periodo*(t+z))+3.5f+0.5f);
+        clearLayer(z);
+        setVoxel(s,c,z);
+        setVoxel(7-s,7-c,z);
+    }
+    t++;
+}
+
+void effect_lysa3d(uint8_t reset)
+{
+    static uint8_t t = 0;
+    const static uint8_t periodo = 32;
+    uint8_t s,c,z,s2;
+    if(reset)
+    {
+        t=0;
+        clearCube();
+        return;
+    }
+    if(t >= periodo)
+    {
+        t = 0;
+    }
+    clearCube();
+    for(z=0;z<periodo;z++)
+    {
+
+        s = (uint8_t)floor(3.5f*sinf((2.0f*PI)/periodo*(t+z))+3.5f+0.5f);
+        c = (uint8_t)floor(3.5f*cosf((2.0f*PI)/periodo*(z))+3.5f+0.5f);
+        s2 = (uint8_t)floor(3.5f*sinf(2.0f*(2.0f*PI)/periodo*(z))+3.5f+0.5f);
+        setVoxel(s,c,s2);
+    }
+    t++;
+}
+
+
+uint8_t sin_int(uint8_t offset)
+{
+
+}
 
 /*Nombre: effect_sweep_plane
  * Descripcion: Ejecuta un efecto de barrido de planos en X, Y ,Z
@@ -648,20 +828,30 @@ void effect_random_move(uint8_t reset)
         return;
     }   
 
-    if(count >= 20)
-    {
-        count = 0;
-        dp = Point(rand()%3-1,rand()%3-1,rand()%3-1);
-    }
+    // if(count >= 20)
+    // {
+    //     count = 0;
+    //     dp = Point(rand()%3-1,rand()%3-1,rand()%3-1);
+    // }
 
     if(!inrange(p.x+dp.x))
+    {
         dp.x = -dp.x;
-    
+        dp.y = rand()&0x01 ? 1 : -1;
+        dp.z = rand()&0x01 ? 1 : -1;
+    }
     if(!inrange(p.y+dp.y))
+    {
         dp.y = -dp.y;
-
+        dp.x = rand()&0x01 ? 1 : -1;
+        dp.z = rand()&0x01 ? 1 : -1;
+    }
     if(!inrange(p.z+dp.z))
+    {
         dp.z = -dp.z;
+        dp.x = rand()&0x01 ? 1 : -1;
+        dp.y = rand()&0x01 ? 1 : -1;
+    }
     
     p = sumPoints(p,dp);
 
@@ -709,6 +899,67 @@ void effect_random_fill(uint8_t reset)
 void effect_spin(uint8_t* config)
 {
 
+}
+
+void effect_octahedron(uint8_t reset)
+{
+    static int8_t z;
+    uint8_t x,y;
+    if(reset)
+    {
+        z = N;
+        clearCube();
+        return;
+    }
+
+    for(x = 0; x < N; x++)
+    {
+        for(y = 0; y < N; y++)
+        {
+            // if(abs(x-3.5f)+abs(y-3.5f)+abs(z-3.5f)== 3.0f)
+            // {
+            //     setVoxel(x,y,z);
+            // }
+            cleanLayer(z);
+            if(abs(x-3.0f)+abs(y-3.0f)+abs(z-3.0f)== 3.0f)
+            {
+                setVoxel(x,y,z);
+            }
+            if(abs(x-3.0f)+abs(y-3.0f)+abs(z-1-3.0f) > 3.0f)
+            {
+                setVoxel(x,y,z-1);
+            }
+        }
+    }
+    
+    z--;
+    if(z < 0)
+    {
+        effect_octahedron(true);
+    }
+}
+
+void effect_diagonal(uint8_t reset)
+{
+    static uint8_t t;
+
+    if(reset)
+    {
+        t = 0;
+        return;
+    }
+
+    for(z = 0 ; z < min(t,N) ; z++)
+    {
+        for(x = 0 ; x < min(z,N) ; x++)
+        {
+            setVoxel(x-z,t-x+z,z);
+        }
+    }
+    t++;
+    if(t >= 22){
+        effect_diagonal(true);
+    }
 }
 
 
@@ -776,4 +1027,6 @@ void set_oblique(int d)
         }
     }
 }
+
+
 

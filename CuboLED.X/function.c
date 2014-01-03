@@ -494,13 +494,17 @@ uint8_t count_neighboors(uint8_t x, uint8_t y, uint8_t z)
         {
             for(dy = -1; dy < 2 ; dy++)
             {
-                if(inrange(z+dz))
+                if(inrange(y+dy))
                 {
                     for(dz = -1; dz < 2 ; dz++)
                     {
                         if(inrange(z+dz))
                         {
-                            neighboors += getVoxel(x+dx,y+dy,z+dz);
+                            if(dx != 0 || dy != 0 || dz!= 0)
+                            {
+                                neighboors += getVoxel(x+dx,y+dy,z+dz);
+                            }
+                            
                         }
                     }   
                 }

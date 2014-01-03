@@ -45,6 +45,12 @@ void initEffects(void)
     {
         effects[i] = &effect_empty;
     }
+
+    effects[6] = &effect_diagonal;
+    effects[7] = &effect_octahedron;
+    effects[8] = &effect_draw_cube;
+    effects[9] = &effect_test;
+
     effects[10] = &effect_animate_cube;
     effects[11] = &effect_expand_cube;
     effects[12] = &effect_rain;
@@ -56,8 +62,11 @@ void initEffects(void)
     effects[18] = &effect_random_move_vertical;
     effects[19] = &effect_random_fragment;
     effects[20] = &effect_wave;
+    effects[21] = &effect_water_drop;
+    effects[22] = &effect_water_drop_2;
+    effects[23] = &effect_spiral;
+    effects[24] = &effect_lysa3d;
          
-
     effects[25] = &game_snake;  
     effects[26] = &font_effect_standard_push_message; 
     effects[27] = &font_effect_broadway_message;      
@@ -111,8 +120,8 @@ char watch_uart(void)
                 if(pbuffer[-1] == '[' && pbuffer[-2] == ESC)
                 {
                     parse_escape_command(mensaje);
+                    break;
                 }
-                break;
 
             default:
                 *pbuffer++ = mensaje;                       // Si es un caracter normal, se copia en el buffer, y si rebosa lo resetea

@@ -42,6 +42,7 @@ uint16_t    getPeriodo                  (void);
 void        setPeriodo                  (uint16_t);
 void        setFactor                   (uint8_t factor);
 
+void        effect_draw_cube            (uint8_t  reset);
 void        effect_animate_cube         (uint8_t  reset);
 void        effect_expand_cube          (uint8_t  reset);
 void        effect_rain                 (uint8_t  reset);
@@ -49,11 +50,18 @@ void        effect_crossing_piramids    (uint8_t  reset);
 void        effect_spin                 (uint8_t* config);
 void        effect_random_fill          (uint8_t  reset);
 void        effect_sweep_plane          (uint8_t  reset);
-void        effect_random_move          (uint8_t reset);
-void        effect_cascade              (uint8_t reset);
-void        effect_random_move_vertical (uint8_t reset);
-void        effect_random_fragment      (uint8_t reset);
-void        effect_wave                 (uint8_t reset);
+void        effect_random_move          (uint8_t  reset);
+void        effect_cascade              (uint8_t  reset);
+void        effect_random_move_vertical (uint8_t  reset);
+void        effect_random_fragment      (uint8_t  reset);
+void        effect_wave                 (uint8_t  reset);
+void        effect_water_drop           (uint8_t  reset);
+void        effect_water_drop_2         (uint8_t  reset);
+void        effect_spiral               (uint8_t  reset);
+void        effect_lysa3d               (uint8_t  reset);
+void        effect_test                 (uint8_t  reset);
+void        effect_octahedron           (uint8_t  reset);
+void        effect_diagonal             (uint8_t  reset);
 
 
 #endif
