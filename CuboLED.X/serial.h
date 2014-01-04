@@ -15,7 +15,7 @@
 #define ESC                 0x1B
 
 #define BUFFER_SIZE         64
-#define NUM_EFFECTS         30 
+#define NUM_EFFECTS         40 
     
 #define EFFECT_ID           'E'
 #define FONT_ID             'F'

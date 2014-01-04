@@ -20,7 +20,7 @@
 // Macros para la defincion de constantes
 #define N           8
 
-#define TREFRESH 	5//20		                               // Periodo de refresco de las capas en decimas de milisegundo 
+#define TREFRESH 	20//20		                               // Periodo de refresco de las capas en decimas de milisegundo 
 #define TCLEAR		2		                               // Periodo de señal de reset en microsegundos 
 
 #define true        1

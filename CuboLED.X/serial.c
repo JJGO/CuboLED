@@ -46,10 +46,10 @@ void initEffects(void)
         effects[i] = &effect_empty;
     }
 
-    effects[6] = &effect_diagonal;
-    effects[7] = &effect_octahedron;
-    effects[8] = &effect_draw_cube;
-
+    effects[6]  = &effect_broadway_rule30;
+    effects[7]  = &effect_octahedron;
+    effects[8]  = &effect_draw_cube;
+    effects[9]  = &effect_diagonal;
     effects[10] = &effect_animate_cube;
     effects[11] = &effect_expand_cube;
     effects[12] = &effect_rain;
@@ -66,11 +66,20 @@ void initEffects(void)
     effects[23] = &effect_spiral;
     effects[24] = &effect_lysa3d;
          
-    effects[25] = &game_snake;  
-    effects[26] = &game_of_life;
-    effects[27] = &font_effect_standard_push_message; 
-    effects[28] = &font_effect_broadway_message;      
-    effects[29] = &font_effect_slide_message;  
+    // Font effects
+    effects[25] = &font_effect_standard_push_message; 
+    effects[26] = &font_effect_broadway_message;      
+    effects[27] = &font_effect_slide_message;
+
+    // Game effects
+    effects[30] = &game_snake;  
+    effects[31] = &effect_game_of_life_34_44;
+    effects[32] = &effect_game_of_life_45_55;
+    effects[33] = &effect_game_of_life_57_66;
+    effects[34] = &effect_gol_glider_45_55;
+    effects[35] = &effect_gol_glider_56_55;
+    effects[36] = &effect_gol_glider_57_66;
+    effects[37] = &effect_gol_spaceship_57_66;
 
 }
 

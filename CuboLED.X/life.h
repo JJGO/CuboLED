@@ -9,7 +9,13 @@
 #include "cubo.h"
 
 //Declaracion de funciones publicas
-void    game_of_life            (uint8_t reset);
+void    effect_game_of_life_34_44   (uint8_t reset);
+void    effect_game_of_life_45_55   (uint8_t reset);
+void    effect_game_of_life_57_66   (uint8_t reset);
+void    effect_gol_glider_45_55     (uint8_t reset);
+void    effect_gol_glider_56_55     (uint8_t reset);
+void    effect_gol_glider_57_66     (uint8_t reset);
+void    effect_gol_spaceship_57_66  (uint8_t reset);
 
 #endif
 

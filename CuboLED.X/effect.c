@@ -54,10 +54,10 @@ void        effect_lysa3d               (uint8_t  reset);
 void        effect_octahedron           (uint8_t  reset);
 void        effect_diagonal             (uint8_t  reset);
 
-
 void        draw_cube                   (uint8_t edge,uint8_t x,uint8_t y,uint8_t z);
 void        ring                        (int l, int z);
-void        set_oblique                 (int d);
+
+void        effect_broadway_rule30      (uint8_t reset);
 
 
 
@@ -684,8 +684,6 @@ void effect_water_drop(uint8_t reset)
             setVoxel(N-1-x,y,s);
             setVoxel(x,N-1-y,s);
             setVoxel(N-1-x,N-1-y,s);
-            // s = (uint8_t)floor(3.5f*sinf((2.0f*PI)/periodo*(t+0.25+sqrt((x-3.5f)*(x-3.5f)+(y-3.5f)*(y-3.5f))))+3.5f+0.5f);
-            // setVoxel(x,y,s);
         }
     }
     t+=0.25f;
@@ -776,12 +774,6 @@ void effect_lysa3d(uint8_t reset)
         setVoxel(s,c,s2);
     }
     t++;
-}
-
-
-uint8_t sin_int(uint8_t offset)
-{
-
 }
 
 /*Nombre: effect_sweep_plane
@@ -1039,25 +1031,58 @@ void ring(int l, int z)
     putAxis(Y, 7-a, z, (0xFF>>2*a)<<a);
 }
 
-/*Nombre: set_oblique
- * Descripcion: Ejecuta un efecto de lluvia aleatoria en el cubo
- * Argumentos: reset - parametro de reinicializacion del efecto
- * Valor devuelto: Ninguno*/
-void set_oblique(int d)
+
+void effect_broadway_rule30(uint8_t reset)
 {
-    int i,j,k;
+    const uint8_t bufferSize = 28;
+    static uint8_t buffer[28];
+    uint8_t i,prev;
+    const static uint8_t rule30[8] = {0,1,1,1,1,0,0,0};
 
-    for(i=0;i<8;i++)
+    if(reset)
+    {   
+        for(i = 0; i < bufferSize; i++)
+            buffer[i] = 0x00;
+        clearCube();
+        buffer[0] = rand()&0xff;
+        return;
+    }
+
+    // Desplaza el buffer
+    for(i = bufferSize-2; i < bufferSize; i--){
+        buffer[i+1] = buffer[i];
+    }
+    for(i = 0 ; i < N ; i++)
     {
-        for(j=0;j<8;j++)
-        {
-            for(k=0;k<8;k++)
+        prev = 0;
+        prev += test(buffer[1],(i-1)&0x07);
+        prev += test(buffer[1],i)<<1;
+        prev += test(buffer[1],(i+1)&0x07)<<2;
+        put(buffer[0],i,rule30[prev]);
+    }
+    
 
-                if(i+j+k==d)
-                    setVoxel(i,j,k);
-        }
+    //COPY TO CUBE
+    // Cara X=0
+    for(i = 0; i < N ; i++)
+    {
+        putAxis(Z,N-1-i,0,buffer[i]);
+    }
+    // Cara Y=0
+    for(i = 1; i < N; i++)
+    {
+        putAxis(Z,0,i,buffer[i+7]);
+    }
+    // Cara X = N-1
+    for(i = 1; i < N; i++)
+    {
+        putAxis(Z,i,N-1,buffer[i+14]);
+    }
+    //Cara Y = N-1
+    for(i = 1; i < N-1; i++)
+    {
+        putAxis(Z,N-1,N-1-i,buffer[i+21]);
     }
 }
-
 
 

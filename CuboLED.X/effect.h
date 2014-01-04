@@ -62,5 +62,6 @@ void        effect_lysa3d               (uint8_t  reset);
 void        effect_octahedron           (uint8_t  reset);
 void        effect_diagonal             (uint8_t  reset);
 
+void        effect_broadway_rule30      (uint8_t reset);
 
 #endif
