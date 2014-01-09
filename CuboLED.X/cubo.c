@@ -43,7 +43,7 @@ void cubeInit(void)
 
     SPIinit();              // Inicializacion del SPI
 
-    initEffects();          // Incializacion del diccionario de efectos
+    effect_init();          // Incializacion del diccionario de efectos
 
     init_snake();
 
@@ -218,16 +218,17 @@ void loadLayer(uint8_t layer)
 void EdgeDetect(int signal)
 {
     //Variables de Edge detector
-    static unsigned int ant = 0;
-    static unsigned int act = 0;
-    static unsigned int _REdge = 1;     // Habilita las acciones en flanco de subida
-    static unsigned int _FEdge = 0;     // Habilita las acciones en flanco de bajada
+    static uint8_t ant = 0;
+    static uint8_t act = 0;
+    static uint8_t _REdge = 1;     // Habilita las acciones en flanco de subida
+    static uint8_t _FEdge = 0;     // Habilita las acciones en flanco de bajada
 
     ant = act;
     act = signal;
     if(ant != act){
         if(_REdge && act){
-            //Accion en flanco de subida         
+            //Accion en flanco de subida 
+            effect_next();  
         }
 
         if(_FEdge && !act){

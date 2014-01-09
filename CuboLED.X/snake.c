@@ -188,11 +188,8 @@ void set_food(void)
         food = getRandomPoint();
         if(!getPoint(food))   //Si esta apagado es posible
         {   
-            //if(count_neighboors(food.x,food.y,food.z)==0)
-            //{
-                setPoint(food);
-                return; 
-            //}  
+            setPoint(food);
+            return;  
         }
     }while(!getPoint(food));  //Mientras este apagado
 

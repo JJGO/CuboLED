@@ -46,7 +46,7 @@ typedef struct pointTag
     int8_t z;
 }point;
 
-// Decalracion de funciones publicas
+// Declaracion de funciones publicas
 void        setVoxel        (int8_t x,  int8_t y,   int8_t z);
 void        clearVoxel      (int8_t x,  int8_t y,   int8_t z);
 void        toggleVoxel     (int8_t x,  int8_t y,   int8_t z);
@@ -73,6 +73,5 @@ uint8_t     pointEquals     (point a, point p);
 point       sumPoints       (point a, point b);
 point       getRandomPoint  (void);
 
-uint8_t     count_neighboors(uint8_t x, uint8_t y, uint8_t z);
 
 #endif

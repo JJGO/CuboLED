@@ -4,7 +4,7 @@
 
 #include "serial.h"
 
-static peffect effects[NUM_EFFECTS];
+
 
 // ------------------------------------ GLOBALES ------------------------------------------
 
@@ -15,7 +15,6 @@ static char buffer[BUFFER_SIZE];
 static char* pbuffer = buffer;
 
 // ----------------------------------- PROTOTIPOS -----------------------------------------
-void    initEffects             (void);
 char    watch_uart              (void);
 void    parse_message           (char* code);
 void    parse_effect            (char* code);
@@ -32,56 +31,7 @@ void    send_periodo            (void);
 
 // ----------------------------------- FUNCIONES ------------------------------------------
 
-/* Nombre: initEffects 
- * Descripción: Inicializacion del diccionario de efectos
- * Argumentos: Ninguno
- * Valor devuelto: Ninguno */ 
 
-void initEffects(void)
-{   
-    uint8_t i;
-
-    for(i=0; i < NUM_EFFECTS; i++)
-    {
-        effects[i] = &effect_empty;
-    }
-
-    effects[6]  = &effect_broadway_rule30;
-    effects[7]  = &effect_octahedron;
-    effects[8]  = &effect_draw_cube;
-    effects[9]  = &effect_diagonal;
-    effects[10] = &effect_animate_cube;
-    effects[11] = &effect_expand_cube;
-    effects[12] = &effect_rain;
-    effects[13] = &effect_crossing_piramids;
-    effects[14] = &effect_sweep_plane;
-    effects[15] = &effect_random_move;
-    effects[16] = &effect_random_fill;
-    effects[17] = &effect_cascade;
-    effects[18] = &effect_random_move_vertical;
-    effects[19] = &effect_random_fragment;
-    effects[20] = &effect_wave;
-    effects[21] = &effect_water_drop;
-    effects[22] = &effect_water_drop_2;
-    effects[23] = &effect_spiral;
-    effects[24] = &effect_lysa3d;
-         
-    // Font effects
-    effects[25] = &font_effect_standard_push_message; 
-    effects[26] = &font_effect_broadway_message;      
-    effects[27] = &font_effect_slide_message;
-
-    // Game effects
-    effects[30] = &game_snake;  
-    effects[31] = &effect_game_of_life_34_44;
-    effects[32] = &effect_game_of_life_45_55;
-    effects[33] = &effect_game_of_life_57_66;
-    effects[34] = &effect_gol_glider_45_55;
-    effects[35] = &effect_gol_glider_56_55;
-    effects[36] = &effect_gol_glider_57_66;
-    effects[37] = &effect_gol_spaceship_57_66;
-
-}
 
 
 /* Nombre: watch_uart 
@@ -164,7 +114,7 @@ void parse_message(char* code)
             effect_reset();
             break;
         case 'N':
-            //effect_next();
+            effect_next();
             break;
         case 'P':
             if(code[1] == 0){
@@ -194,6 +144,7 @@ void parse_message(char* code)
 void parse_effect(char* code)
 {
     uint8_t effect_id = atoi(code+1);    
+    num_effect = effect_id;
     if(effect_id < NUM_EFFECTS)
     {
         effect_launch(effects[effect_id]);

@@ -23,7 +23,7 @@ void    effect_game_of_life_57_66   (uint8_t reset);
 void    effect_gol_glider_45_55     (uint8_t reset);
 void    effect_gol_glider_56_55     (uint8_t reset);
 void    effect_gol_glider_57_66     (uint8_t reset);
-void    effect_gol_spaceship_57_66  (uint8_t reset);
+void    effect_gol_blicker_57_66  (uint8_t reset);
 
 void    gol_random_init             (void);
 void    gol_next_generation         (void);
@@ -150,7 +150,7 @@ void effect_gol_glider_57_66(uint8_t reset)
     gol_next_generation();
 }
 
-void effect_gol_spaceship_57_66(uint8_t reset)
+void effect_gol_blicker_57_66(uint8_t reset)
 {
     if(reset)
     {

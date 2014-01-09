@@ -17,23 +17,32 @@ static uint16_t  periodo_effect = 1000;  //Periodo entre llamadas al efecto en m
        uint8_t   analog_period = true;
 static uint8_t   factor = 2;
 
+       uint8_t num_effect = 0;
+peffect effects[NUM_EFFECTS];
+
+static uint8_t despl = 0;
+
+
 
 // ----------------------------------- PROTOTIPOS -----------------------------------------
 
+void        effect_init                 (void);
 void        effect_launch               (peffect effect);
-void        effect_reset                (void);
-void        effect_repeat               (peffect effect, int8_t iterations);
-void        effect_launch_second        (peffect effect, int8_t iterations);
+void        effect_repeat               (peffect effect, int16_t iterations);
+void        effect_launch_second        (peffect effect, int16_t iterations);
 void        effect_clean                (void);
 void        effect_quit                 (void);
 void        effect_second_quit          (void);
-void        effect_empty                (uint8_t a);
+void        effect_reset                (void);
+void        effect_empty                (uint8_t reset);
 void        effect_launcher             (void);
+void        effect_next                 (void);
 
 uint16_t    getPeriodo                  (void);
 void        setPeriodo                  (uint16_t);
 void        setFactor                   (uint8_t factor);
 
+void        effect_demo                 (uint8_t  reset);
 void        effect_draw_cube            (uint8_t  reset);
 void        effect_animate_cube         (uint8_t  reset);
 void        effect_expand_cube          (uint8_t  reset);
@@ -53,11 +62,14 @@ void        effect_spiral               (uint8_t  reset);
 void        effect_lysa3d               (uint8_t  reset);
 void        effect_octahedron           (uint8_t  reset);
 void        effect_diagonal             (uint8_t  reset);
+void        effect_random_path          (uint8_t  reset);
+void        effect_load_bar             (uint8_t  reset);
+void        effect_random_fall          (uint8_t  reset);
+
 
 void        draw_cube                   (uint8_t edge,uint8_t x,uint8_t y,uint8_t z);
 void        ring                        (int l, int z);
 
-void        effect_broadway_rule30      (uint8_t reset);
 
 
 
@@ -65,6 +77,66 @@ void        effect_broadway_rule30      (uint8_t reset);
 // ----------------------------------- FUNCIONES ------------------------------------------
 
 // ---------------------FUNCIONES DE ADMINISTRACION DE EFECTOS ----------------------------
+
+/* Nombre: effect_init 
+ * Descripción: Inicializacion del diccionario de efectos
+ * Argumentos: Ninguno
+ * Valor devuelto: Ninguno */ 
+
+void effect_init (void)
+{   
+    uint8_t i;
+
+    for(i=0; i < NUM_EFFECTS; i++)
+    {
+        effects[i] = &effect_empty;
+    }
+    //Reservados
+    effects[0]  = &effect_demo;
+
+    // Orthogonal
+    effects[3]  = &effect_sweep_plane;
+    effects[4]  = &effect_draw_cube;
+    effects[5]  = &effect_animate_cube;
+    effects[6]  = &effect_expand_cube;
+
+    effects[7]  = &effect_octahedron;
+    effects[8]  = &effect_diagonal;
+    effects[9]  = &effect_crossing_piramids;
+
+    // Random
+
+    effects[10] = &effect_random_move;
+    effects[11] = &effect_random_fill;
+    effects[12] = &effect_cascade;
+    effects[13] = &effect_rain;
+    effects[14] = &effect_random_move_vertical;
+    effects[15] = &effect_random_fragment;
+
+    //Float
+    effects[16] = &effect_wave;
+    effects[17] = &effect_water_drop;
+    effects[18] = &effect_water_drop_2;
+    effects[19] = &effect_spiral;
+    effects[20] = &effect_lysa3d;
+         
+    // Font effects
+    effects[21] = &font_effect_standard_push_message; 
+    effects[22] = &font_effect_broadway_message;      
+    effects[23] = &font_effect_slide_message;
+
+    // Game effects
+    effects[25] = &game_snake;  
+    effects[26] = &effect_game_of_life_34_44;
+    effects[27] = &effect_gol_glider_45_55;
+    effects[28] = &effect_gol_glider_56_55;
+    effects[29] = &effect_gol_glider_57_66;
+
+    effects[30] = effect_random_path;
+    effects[31] = effect_load_bar;
+    effects[33] = effect_random_fall;
+
+}
 
 /*Nombre: effect_launcher
  * Descripcion: Rutina de monitorizacion y ejecucion de los efectos, llama a los efectos y obtiene el periodo 
@@ -127,7 +199,7 @@ void effect_launch(peffect effect)
                 iterations - numero de iteraciones que el efecto ejecutara
  * Valor devuelto: Ninguno*/
 
-void effect_repeat(peffect effect, int8_t iterations)
+void effect_repeat (peffect effect, int16_t iterations)
 {
     if(current_effect != &effect_empty)
         effect_quit();
@@ -143,7 +215,7 @@ void effect_repeat(peffect effect, int8_t iterations)
                iterations - numero de iteraciones que el efecto ejecutara
  * Valor devuelto: Ninguno*/
 
-void effect_launch_second(peffect effect, int8_t iterations)
+void effect_launch_second (peffect effect, int16_t iterations)
 {
     if(current_effect == &effect_empty)
         effect_repeat(effect,iterations);       // Si no tiene padre simplemente se lanza
@@ -194,9 +266,19 @@ void effect_second_quit(void)
  * Argumentos:  Ninguno
  * Valor devuelto: Ninguno*/
 
-void effect_empty(uint8_t a)
+void effect_empty(uint8_t reset)
 {
     
+}
+
+void effect_next(void)
+{
+    effect_launch(effects[num_effect]);   
+    num_effect++;
+    if(num_effect >= NUM_EFFECTS)
+    {
+        num_effect = 0;
+    }
 }
 
 /*Nombre: getPeriodo
@@ -236,6 +318,216 @@ void setFactor(uint8_t f)
 
 
 // ------------------------------------ EFECTOS -------------------------------------------
+
+void effect_demo(uint8_t reset)
+{
+    static uint8_t stage = 0;
+
+    if(reset)
+    {
+        stage = 0;
+        return;
+    }
+
+    stage++;
+
+    switch(stage)
+    {
+        case 1:
+            // INTRO 
+            setMessage("Hola");
+            setPeriodo(1000);
+            effect_launch_second(&font_effect_standard_push_message,5*6);
+            break;
+
+        case 2:
+
+            setMessage("Cubo LED 8x8x8   ");
+            setPeriodo(1000);
+            effect_launch_second(&font_effect_broadway_message,18*N);
+            break;
+
+        case 3:
+
+            setPeriodo(800);
+            effect_launch_second(&effect_sweep_plane,6*N);
+            break;
+
+        case 4:
+
+            setPeriodo(1200);
+            effect_launch_second(&effect_draw_cube,3*(3*N-1));
+            break;
+
+        case 5:
+
+            setPeriodo(700);
+            effect_launch_second(&effect_animate_cube,6*2*10);
+            break;
+
+        case 6:
+
+            setPeriodo(1300);
+            effect_launch_second(&effect_expand_cube,4*2*2);
+            break;
+
+        case 7:
+
+            setPeriodo(1400);
+            effect_launch_second(&effect_octahedron,N+4+N);
+            break;
+
+        case 8:
+
+            setPeriodo(700);
+            effect_launch_second(&effect_diagonal,4*(3*N-2));
+            break;
+
+        case 9:
+
+            setPeriodo(1000);
+            effect_launch_second(&effect_crossing_piramids,6*(4+N+4));
+            break;
+
+        case 10:
+
+            setPeriodo(700);
+            effect_launch_second(&effect_random_move,50);
+            break;
+
+        case 11:
+
+            setPeriodo(161);
+            effect_launch_second(&effect_random_fill,512/N);
+            break;
+
+        case 12:
+
+            setPeriodo(1000);
+            effect_launch_second(&effect_cascade,100);
+            break;
+
+        case 13:
+
+            setPeriodo(800);
+            effect_launch_second(&effect_rain,150);
+            break;
+
+        case 14:
+
+            setPeriodo(400);
+            effect_launch_second(&effect_random_move_vertical,200);
+            break;
+
+        case 15:
+
+            setPeriodo(1000);
+            effect_launch_second(&effect_random_fragment,(N-1)*12);
+            break;
+
+        case 16:
+
+            setPeriodo(700);
+            effect_launch_second(&effect_wave,100);
+            break;
+
+        case 17:
+
+            setPeriodo(500);
+            effect_launch_second(&effect_water_drop,200);
+            break;
+
+        case 18:
+
+            setPeriodo(400);
+            effect_launch_second(&effect_water_drop_2,200);
+            break;
+
+        case 19:
+
+            setPeriodo(500);
+            effect_launch_second(&effect_spiral,200);
+            break;
+
+        case 20:
+
+            setPeriodo(650);
+            effect_launch_second(&effect_lysa3d,100);
+            break;
+
+        case 21:
+
+            setPeriodo(800);
+            effect_launch_second(&effect_game_of_life_34_44,60);
+            break;
+
+        case 22:
+
+            setPeriodo(900);
+            effect_launch_second(&effect_gol_glider_45_55,50);
+            break;
+
+        case 23:
+
+            setPeriodo(700);
+            effect_launch_second(&effect_gol_glider_56_55,70);
+            break;
+
+        case 24:
+
+            setPeriodo(950);
+            effect_launch_second(&effect_gol_glider_57_66,50);
+            break;
+
+        case 25:
+
+            setPeriodo(600);
+            effect_launch_second(&effect_random_path,150);
+            break;
+
+        case 26:
+
+            setPeriodo(900);
+            effect_launch_second(&effect_load_bar,6*N);
+            break;
+
+        case 27:
+
+            setPeriodo(600);
+            effect_launch_second(&effect_random_fall,72*4);
+            break;
+
+        case 28:
+            setMessage("THE END");
+            setPeriodo(1000);
+            effect_launch_second(&font_effect_slide_message,8*N);
+            break;
+
+        case 29:
+            setMessage("BONUS!");
+            setPeriodo(1000);
+            effect_launch_second(&font_effect_standard_push_message,7*6);
+            break;
+
+        case 30:
+            setMessage("SNAKE 3D");
+            setPeriodo(1000);
+            effect_launch_second(font_effect_broadway_message,N*9);
+            break;
+
+        case 31:
+            effect_second_quit();
+            effect_launch(&game_snake);
+            break;
+
+        default:
+            break;
+
+
+
+    }
+
+}
 
 void effect_draw_cube(uint8_t reset)
 {
@@ -300,8 +592,8 @@ void effect_animate_cube(uint8_t reset)
 {
 
     static uint8_t x = 0, y = 0, z = 0;
-    static uint8_t i = 0, j = 0;
-    static uint8_t growing = true;
+    static uint8_t i = N, j = 0;
+    static uint8_t growing = false;
     const uint8_t min = 3,max = 8;
 
     if(reset)
@@ -345,14 +637,14 @@ void effect_animate_cube(uint8_t reset)
 
 void effect_expand_cube(uint8_t reset)
 {
-    static int size = 2;
-    static char growing = true;
+    static int size = N;
+    static char growing = false;
     uint8_t corner = 0; 
 
     if(reset)
     {
-        size = 2;
-        growing = true;
+        size = N;
+        growing = false;
         clearCube();
         return;
     }
@@ -504,6 +796,7 @@ void effect_random_move_vertical(uint8_t reset)
     if(reset)
     {
         clearCube();
+
         for(x = 0; x < N; x++)
         {
             r = rand();
@@ -520,7 +813,7 @@ void effect_random_move_vertical(uint8_t reset)
         return;
     }
 
-    if(leaps >= N-1)
+      if(leaps >= N-1)
     {
         leaps = 0;
         x = rand()&0x07;
@@ -530,6 +823,64 @@ void effect_random_move_vertical(uint8_t reset)
     leaps++;
     putAxis(Z,x,y,0x00);
     setVoxel(x,y,up ? leaps :(N-1)-leaps);
+
+    
+}
+
+void effect_random_fall(uint8_t reset)
+{
+    
+    static uint8_t up = true;
+    static point points[N-1];
+    point p;
+    uint8_t x,y,i;
+
+    if(reset)
+    {
+        for(i = 0; i < N-1; i++)
+        {
+            points[i] = Point(9,9,0);
+        }
+        despl = 0;
+        up = true;
+        clearCube();
+        fillPlane(Z,0,0xff);
+        return;
+    }
+
+    if(despl < 64){
+        do{
+            x = rand()&0x07;
+            y = rand()&0x07;
+        }while(!getVoxel(x,y,up ? 0 : N-1));
+        p = Point(x,y,up ? 0 : N-1);
+        despl++;
+    }else if( despl < 64+N)
+    {
+        p = Point(9,9,0);
+        despl++;
+    }
+    else
+    {
+        despl = 0;
+        up = !up;
+    }
+
+
+    for(i =N-1 ; i >0 ; i--)
+    {
+        points[i] = points[i-1];
+    }
+    points[0] = p;
+
+    for(i = 0; i < N-1 ; i++)
+    {
+        clearPoint(points[i]);
+        points[i] = sumPoints(points[i],Point(0,0,up ? 1 : -1));
+        setPoint(points[i]);
+    }
+    
+    
 }
 
 void effect_random_fragment(uint8_t reset)
@@ -638,8 +989,8 @@ void effect_random_fragment(uint8_t reset)
 
 void effect_wave(uint8_t reset)
 {
-    static uint8_t t = 0;
-    const static uint8_t periodo = 16;
+    static float t = 0;
+    const static uint8_t periodo = 8;
     uint8_t s;
     if(reset)
     {
@@ -651,10 +1002,10 @@ void effect_wave(uint8_t reset)
     {
         t = 0;
     }
-    shiftCube(X,false,false);
+    shiftCube(Y,false,false);
     s = (uint8_t)floor(3.5f*sinf((2.0f*PI)/periodo*(t))+3.5f+0.5f);
-    fillPlane(X,0,0x01<<s);
-    t++;
+    fillPlane(Y,0,0x01<<s);
+    t+=0.5f;
 }
 
 
@@ -719,6 +1070,7 @@ void effect_water_drop_2(uint8_t reset)
     }
     t+=0.5f;
 }
+
 
 void effect_spiral(uint8_t reset)
 {
@@ -806,6 +1158,34 @@ void effect_sweep_plane(uint8_t reset)
     i++;
 }
 
+/*Nombre: effect_load_bar
+ * Descripcion: Ejecuta un efecto de barrido de planos en X, Y ,Z
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
+
+void effect_load_bar(uint8_t reset)
+{
+    static uint8_t i,j;
+
+    if(reset)
+    {
+        i = j = 0;
+        clearCube();
+        return;
+    }
+
+    if(i>=N){
+        i = 0;
+        j++;
+        if(j>=6)
+        {
+            j=0;
+        }
+    }
+    fillPlane(j/2+1,i,j%2 ? 0x00 :0xff);
+    i++;
+}
+
 /*Nombre: effect_random_move
  * Descripcion: Ejecuta un efecto de mover un punto de forma aleatoria que va rebotando contra las paredes
  * Argumentos: reset - parametro de reinicializacion del efecto
@@ -814,22 +1194,15 @@ void effect_sweep_plane(uint8_t reset)
 
 void effect_random_move(uint8_t reset)
 {   
-    static int8_t count;
+
     static point p, dp;
     if(reset)
     {
         p = getRandomPoint();
         dp = Point(rand()%3-1,rand()%3-1,rand()%3-1);
-        count = 0;
         clearCube();
         return;
     }   
-
-    // if(count >= 20)
-    // {
-    //     count = 0;
-    //     dp = Point(rand()%3-1,rand()%3-1,rand()%3-1);
-    // }
 
     if(!inrange(p.x+dp.x))
     {
@@ -856,10 +1229,58 @@ void effect_random_move(uint8_t reset)
 
     setPoint(p);
 
-    count++;
-
 
 }
+
+/*Nombre: effect_random_path
+ * Descripcion: Ejecuta un efecto de mover un punto de forma aleatoria que va rebotando contra las paredes dejando una estela
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
+
+
+void effect_random_path(uint8_t reset)
+{   
+    static point p, dp,path[10];
+    uint8_t i;
+    if(reset)
+    {
+        p = getRandomPoint();
+        dp = Point(rand()%3-1,rand()%3-1,rand()%3-1);
+        clearCube();
+        return;
+    }   
+    p = path[0];
+    if(!inrange(p.x+dp.x))
+    {
+        dp.x = -dp.x;
+        dp.y = rand()&0x01 ? 1 : -1;
+        dp.z = rand()&0x01 ? 1 : -1;
+    }
+    if(!inrange(p.y+dp.y))
+    {
+        dp.y = -dp.y;
+        dp.x = rand()&0x01 ? 1 : -1;
+        dp.z = rand()&0x01 ? 1 : -1;
+    }
+    if(!inrange(p.z+dp.z))
+    {
+        dp.z = -dp.z;
+        dp.x = rand()&0x01 ? 1 : -1;
+        dp.y = rand()&0x01 ? 1 : -1;
+    }
+    
+
+    clearCube();
+    for(i = 10; i >0 ; i--)
+    {
+        path[i] = path[i-1];
+        setPoint(path[i]);
+    }
+    path[0] =sumPoints(p,dp);
+    setPoint(path[0]);
+
+}
+
 
 /*Nombre: effect_random_fill
  * Descripcion: Ejecuta un efecto de rellenar el cubo de forma aleatoria
@@ -870,6 +1291,7 @@ void effect_random_fill(uint8_t reset)
 {
     static int i = 0;
     point p;
+    uint8_t j;
 
     if(reset)
     {   
@@ -877,26 +1299,23 @@ void effect_random_fill(uint8_t reset)
         clearCube();
     }
 
+    
+    for(j = 0 ; j < N ;j++)
+    {
+        do{
+            p = getRandomPoint();
+        }while(getPoint(p));
+        setPoint(p);
+    }
+    
+    i+=N;
     if(i >= 512)
     {
-        effect_random_fill(false);
-    }
-
-    while(1){
-        p = getRandomPoint();
-        if(!getPoint(p)){
-            setPoint(p);
-            i++;
-            break;
-        }
+        effect_random_fill(true);
     }
 
 }
 
-void effect_spin(uint8_t* config)
-{
-
-}
 
 void effect_octahedron(uint8_t reset)
 {
@@ -921,10 +1340,6 @@ void effect_octahedron(uint8_t reset)
                {
                    setVoxel(x,y,z);
                }
-               // if(abs(x-3.0f)+abs(y-3.0f)+abs(z-1-4.0f) > 3.0f)
-               // {
-               //     setVoxel(x,y,z-1);
-               // }
            }
        }
        
@@ -937,16 +1352,6 @@ void effect_octahedron(uint8_t reset)
     }else{
         fillPlane(X,z,0x00);
         fillPlane(X,z-1,0xff);
-        // for(x = 0; x < N; x++)
-        // {
-        //     for(y = 0; y < N; y++)
-        //     {
-        //         if(abs(x-3.0f)+abs(y-3.0f)+abs(z+1-4.0f) > 3.0f)
-        //         {
-        //             setVoxel(x,y,z+1);
-        //         }
-        //     }
-        // }
         z--;
         if(z < 0){
             effect_octahedron(true);
@@ -1032,57 +1437,57 @@ void ring(int l, int z)
 }
 
 
-void effect_broadway_rule30(uint8_t reset)
-{
-    const uint8_t bufferSize = 28;
-    static uint8_t buffer[28];
-    uint8_t i,prev;
-    const static uint8_t rule30[8] = {0,1,1,1,1,0,0,0};
+// void effect_broadway_rule30(uint8_t reset)
+// {
+//     const uint8_t bufferSize = 28;
+//     static uint8_t buffer[28];
+//     uint8_t i,prev;
+//     const static uint8_t rule30[8] = {0,1,1,1,1,0,0,0};
 
-    if(reset)
-    {   
-        for(i = 0; i < bufferSize; i++)
-            buffer[i] = 0x00;
-        clearCube();
-        buffer[0] = rand()&0xff;
-        return;
-    }
+//     if(reset)
+//     {   
+//         for(i = 0; i < bufferSize; i++)
+//             buffer[i] = 0x00;
+//         clearCube();
+//         buffer[0] = rand()&0xff;
+//         return;
+//     }
 
-    // Desplaza el buffer
-    for(i = bufferSize-2; i < bufferSize; i--){
-        buffer[i+1] = buffer[i];
-    }
-    for(i = 0 ; i < N ; i++)
-    {
-        prev = 0;
-        prev += test(buffer[1],(i-1)&0x07);
-        prev += test(buffer[1],i)<<1;
-        prev += test(buffer[1],(i+1)&0x07)<<2;
-        put(buffer[0],i,rule30[prev]);
-    }
+//     // Desplaza el buffer
+//     for(i = bufferSize-2; i < bufferSize; i--){
+//         buffer[i+1] = buffer[i];
+//     }
+//     for(i = 0 ; i < N ; i++)
+//     {
+//         prev = 0;
+//         prev += test(buffer[1],(i-1)&0x07);
+//         prev += test(buffer[1],i)<<1;
+//         prev += test(buffer[1],(i+1)&0x07)<<2;
+//         put(buffer[0],i,rule30[prev]);
+//     }
     
 
-    //COPY TO CUBE
-    // Cara X=0
-    for(i = 0; i < N ; i++)
-    {
-        putAxis(Z,N-1-i,0,buffer[i]);
-    }
-    // Cara Y=0
-    for(i = 1; i < N; i++)
-    {
-        putAxis(Z,0,i,buffer[i+7]);
-    }
-    // Cara X = N-1
-    for(i = 1; i < N; i++)
-    {
-        putAxis(Z,i,N-1,buffer[i+14]);
-    }
-    //Cara Y = N-1
-    for(i = 1; i < N-1; i++)
-    {
-        putAxis(Z,N-1,N-1-i,buffer[i+21]);
-    }
-}
+//     //COPY TO CUBE
+//     // Cara X=0
+//     for(i = 0; i < N ; i++)
+//     {
+//         putAxis(Z,N-1-i,0,buffer[i]);
+//     }
+//     // Cara Y=0
+//     for(i = 1; i < N; i++)
+//     {
+//         putAxis(Z,0,i,buffer[i+7]);
+//     }
+//     // Cara X = N-1
+//     for(i = 1; i < N; i++)
+//     {
+//         putAxis(Z,i,N-1,buffer[i+14]);
+//     }
+//     //Cara Y = N-1
+//     for(i = 1; i < N-1; i++)
+//     {
+//         putAxis(Z,N-1,N-1-i,buffer[i+21]);
+//     }
+// }
 
 
