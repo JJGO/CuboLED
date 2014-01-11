@@ -1,4 +1,6 @@
 // Jose Javier Gonzalez Ortiz
+// Copyright ©2013-2014, Jose Javier Gonzalez Ortiz. All rights reserved.
+
 // Libreria de funciones para manipular sobre el CuboLED
 // function.c
 

@@ -1,4 +1,6 @@
 // Jose Javier Gonzalez Ortiz
+// Copyright ©2013-2014, Jose Javier Gonzalez Ortiz. All rights reserved.
+
 // Libreria para la definicion de efectos ejecutables por el CuboLED
 // effect.c
 
@@ -20,7 +22,7 @@ static uint8_t   factor = 2;
        uint8_t num_effect = 0;
 peffect effects[NUM_EFFECTS];
 
-static uint8_t despl = 0;
+static uint16_t despl = 0;
 
 
 
@@ -59,12 +61,14 @@ void        effect_wave                 (uint8_t  reset);
 void        effect_water_drop           (uint8_t  reset);
 void        effect_water_drop_2         (uint8_t  reset);
 void        effect_spiral               (uint8_t  reset);
-void        effect_lysa3d               (uint8_t  reset);
+void        effect_lissajous3d          (uint8_t  reset);
 void        effect_octahedron           (uint8_t  reset);
 void        effect_diagonal             (uint8_t  reset);
 void        effect_random_path          (uint8_t  reset);
 void        effect_load_bar             (uint8_t  reset);
 void        effect_random_fall          (uint8_t  reset);
+
+void        effect_broadway_binary      (uint8_t  reset);
 
 
 void        draw_cube                   (uint8_t edge,uint8_t x,uint8_t y,uint8_t z);
@@ -94,7 +98,7 @@ void effect_init (void)
     //Reservados
     effects[0]  = &effect_demo;
 
-    // Orthogonal
+    // Orthogonal 
     effects[3]  = &effect_sweep_plane;
     effects[4]  = &effect_draw_cube;
     effects[5]  = &effect_animate_cube;
@@ -118,7 +122,7 @@ void effect_init (void)
     effects[17] = &effect_water_drop;
     effects[18] = &effect_water_drop_2;
     effects[19] = &effect_spiral;
-    effects[20] = &effect_lysa3d;
+    effects[20] = &effect_lissajous3d;
          
     // Font effects
     effects[21] = &font_effect_standard_push_message; 
@@ -132,9 +136,15 @@ void effect_init (void)
     effects[28] = &effect_gol_glider_56_55;
     effects[29] = &effect_gol_glider_57_66;
 
-    effects[30] = effect_random_path;
-    effects[31] = effect_load_bar;
-    effects[33] = effect_random_fall;
+    effects[30] = &effect_random_path;
+    effects[31] = &effect_load_bar;
+    effects[33] = &effect_random_fall;
+
+    effects[34] = &effect_broadway_binary;
+
+    effects[35] = &font_effect_display_ascii;
+    effects[36] = &font_effect_display_greek;
+    effects[37] = &font_effect_display_hiragana;
 
 }
 
@@ -271,6 +281,11 @@ void effect_empty(uint8_t reset)
     
 }
 
+/*Nombre: effect_next
+ * Descripcion: Efecto para pasar al efecto siguiente en la tabla de efectos
+ * Argumentos: Ninguno
+ * Valor devuelto: Ninguno*/
+
 void effect_next(void)
 {
     effect_launch(effects[num_effect]);   
@@ -318,6 +333,11 @@ void setFactor(uint8_t f)
 
 
 // ------------------------------------ EFECTOS -------------------------------------------
+
+/*Nombre: effect_demo
+ * Descripcion: Funcion para la ejecuccion de una demo automatizada
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
 
 void effect_demo(uint8_t reset)
 {
@@ -452,7 +472,7 @@ void effect_demo(uint8_t reset)
         case 20:
 
             setPeriodo(650);
-            effect_launch_second(&effect_lysa3d,100);
+            effect_launch_second(&effect_lissajous3d,100);
             break;
 
         case 21:
@@ -528,6 +548,11 @@ void effect_demo(uint8_t reset)
     }
 
 }
+
+/*Nombre: effect_draw_cube
+ * Descripcion: Funcion para dibujar el cubo de perimetro y borrarlo
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
 
 void effect_draw_cube(uint8_t reset)
 {
@@ -629,7 +654,7 @@ void effect_animate_cube(uint8_t reset)
     draw_cube(i,x*(8-i),y*(8-i),z*(8-i));    
 }
 
-/*Nombre: effect_rain
+/*Nombre: effect_expand_cube
  * Descripcion: Ejecuta un efecto que consiste en expandir y comprimir un cubo de forma periodica
                 Requiere de drawCube()
  * Argumentos: reset - parametro de reinicializacion del efecto
@@ -789,6 +814,11 @@ void effect_crossing_piramids(uint8_t reset)
     }
 }
 
+/*Nombre: effect_random_move_vertical
+ * Descripcion: Efecto para mover aleatoriamente puntos de la capa superior a la inferiors
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
+
 void effect_random_move_vertical(uint8_t reset)
 {
     static uint8_t x,y, up,leaps;
@@ -827,9 +857,14 @@ void effect_random_move_vertical(uint8_t reset)
     
 }
 
+/*Nombre: effect_random_fall
+ * Descripcion: Efecto para mover aleatoriamente puntos de la capa superior a la inferior de forma gradual
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
+
 void effect_random_fall(uint8_t reset)
 {
-    
+    //static uint16_t despl = 0;
     static uint8_t up = true;
     static point points[N-1];
     point p;
@@ -882,6 +917,11 @@ void effect_random_fall(uint8_t reset)
     
     
 }
+
+/*Nombre: effect_random_fragment
+ * Descripcion: efecto para fragmentar un plano a lo largo de un eje y recomponenerlo al final
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
 
 void effect_random_fragment(uint8_t reset)
 {
@@ -987,6 +1027,11 @@ void effect_random_fragment(uint8_t reset)
     
 }
 
+/*Nombre: effect_wave
+ * Descripcion: Produce una onda sinusoidal
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
+
 void effect_wave(uint8_t reset)
 {
     static float t = 0;
@@ -1008,6 +1053,10 @@ void effect_wave(uint8_t reset)
     t+=0.5f;
 }
 
+/*Nombre: effect_water_drop
+ * Descripcion: Produce una señal sinusoidal con  origen 3.5,3.5 y con desfase en funcion de la distancia al origen
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
 
 void effect_water_drop(uint8_t reset)
 {
@@ -1040,6 +1089,11 @@ void effect_water_drop(uint8_t reset)
     t+=0.25f;
 }
 
+/*Nombre: effect_water_drop
+ * Descripcion: Produce una señal sinusoidal con  origen 0,0 y con desfase en funcion de la distancia al origen
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
+
 void effect_water_drop_2(uint8_t reset)
 {
     static float t = 0;
@@ -1071,6 +1125,11 @@ void effect_water_drop_2(uint8_t reset)
     t+=0.5f;
 }
 
+/*Nombre: effect_spiral
+ * Descripcion: Produce un efecto helicoidal con dos particulas moviendose en helice
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
+
 
 void effect_spiral(uint8_t reset)
 {
@@ -1101,7 +1160,12 @@ void effect_spiral(uint8_t reset)
     t++;
 }
 
-void effect_lysa3d(uint8_t reset)
+/*Nombre: effect_lissajous3d
+ * Descripcion: Produce un funcion de lysa
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
+
+void effect_lissajous3d(uint8_t reset)
 {
     static uint8_t t = 0;
     const static uint8_t periodo = 32;
@@ -1159,7 +1223,7 @@ void effect_sweep_plane(uint8_t reset)
 }
 
 /*Nombre: effect_load_bar
- * Descripcion: Ejecuta un efecto de barrido de planos en X, Y ,Z
+ * Descripcion: Ejecuta un efecto de rellenado de planos en X, Y ,Z
  * Argumentos: reset - parametro de reinicializacion del efecto
  * Valor devuelto: Ninguno*/
 
@@ -1316,6 +1380,10 @@ void effect_random_fill(uint8_t reset)
 
 }
 
+/*Nombre: effect_octahedron
+ * Descripcion: Ejecuta un efecto de dibujar un octaedro de 7x7x7
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
 
 void effect_octahedron(uint8_t reset)
 {
@@ -1360,6 +1428,11 @@ void effect_octahedron(uint8_t reset)
     
 }
 
+/*Nombre: effect_diagonal
+ * Descripcion: Ejecuta un efecto de dibujar diagonales hasta llenar el cubo y luego las va borrando de forma analoga
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
+
 void effect_diagonal(uint8_t reset)
 {
     static uint8_t t,on;
@@ -1387,6 +1460,59 @@ void effect_diagonal(uint8_t reset)
     if(t > 22){
         t=0;
         on = !on;
+    }
+}
+
+/*Nombre: effect_diagonal
+ * Descripcion: Ejecuta un efecto de barrido broadway binario
+ * Argumentos: reset - parametro de reinicializacion del efecto
+ * Valor devuelto: Ninguno*/
+
+void effect_broadway_binary(uint8_t reset)
+{
+    const uint8_t bufferSize = 28;
+    static uint8_t buffer[28];
+    static uint8_t j = 0;
+    uint8_t i;
+
+    if(reset)
+    {   
+        j = 0;
+        for(i = 0; i < bufferSize; i++)
+            buffer[i] = 0x00;
+        clearCube();
+        buffer[0] = rand()&0xff;
+        return;
+    }
+
+    // Desplaza el buffer
+    for(i = bufferSize-2; i < bufferSize; i--){
+        buffer[i+1] = buffer[i];
+    }
+
+    buffer[0] = j++;
+    
+
+    //COPY TO CUBE
+    // Cara X=0
+    for(i = 0; i < N ; i++)
+    {
+        putAxis(Z,N-1-i,0,buffer[i]);
+    }
+    // Cara Y=0
+    for(i = 1; i < N; i++)
+    {
+        putAxis(Z,0,i,buffer[i+7]);
+    }
+    // Cara X = N-1
+    for(i = 1; i < N; i++)
+    {
+        putAxis(Z,i,N-1,buffer[i+14]);
+    }
+    //Cara Y = N-1
+    for(i = 1; i < N-1; i++)
+    {
+        putAxis(Z,N-1,N-1-i,buffer[i+21]);
     }
 }
 
@@ -1437,57 +1563,6 @@ void ring(int l, int z)
 }
 
 
-// void effect_broadway_rule30(uint8_t reset)
-// {
-//     const uint8_t bufferSize = 28;
-//     static uint8_t buffer[28];
-//     uint8_t i,prev;
-//     const static uint8_t rule30[8] = {0,1,1,1,1,0,0,0};
 
-//     if(reset)
-//     {   
-//         for(i = 0; i < bufferSize; i++)
-//             buffer[i] = 0x00;
-//         clearCube();
-//         buffer[0] = rand()&0xff;
-//         return;
-//     }
-
-//     // Desplaza el buffer
-//     for(i = bufferSize-2; i < bufferSize; i--){
-//         buffer[i+1] = buffer[i];
-//     }
-//     for(i = 0 ; i < N ; i++)
-//     {
-//         prev = 0;
-//         prev += test(buffer[1],(i-1)&0x07);
-//         prev += test(buffer[1],i)<<1;
-//         prev += test(buffer[1],(i+1)&0x07)<<2;
-//         put(buffer[0],i,rule30[prev]);
-//     }
-    
-
-//     //COPY TO CUBE
-//     // Cara X=0
-//     for(i = 0; i < N ; i++)
-//     {
-//         putAxis(Z,N-1-i,0,buffer[i]);
-//     }
-//     // Cara Y=0
-//     for(i = 1; i < N; i++)
-//     {
-//         putAxis(Z,0,i,buffer[i+7]);
-//     }
-//     // Cara X = N-1
-//     for(i = 1; i < N; i++)
-//     {
-//         putAxis(Z,i,N-1,buffer[i+14]);
-//     }
-//     //Cara Y = N-1
-//     for(i = 1; i < N-1; i++)
-//     {
-//         putAxis(Z,N-1,N-1-i,buffer[i+21]);
-//     }
-// }
 
 

@@ -1,4 +1,6 @@
 // Jose Javier Gonzalez Ortiz
+// Copyright ©2013-2014, Jose Javier Gonzalez Ortiz. All rights reserved.
+
 // Libreria para la ejecucion del juego de la vida de Conway en el Cubo LED
 // life.h
 

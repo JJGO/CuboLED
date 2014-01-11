@@ -1,4 +1,6 @@
 // Jose Javier Gonzalez Ortiz
+// Copyright ©2013-2014, Jose Javier Gonzalez Ortiz. All rights reserved.
+
 // Libreria para el control de ejecucion de efectos en el cubo mediante el modulo UART
 // serial.h
 

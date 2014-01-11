@@ -1,4 +1,6 @@
 // Jose Javier Gonzalez Ortiz
+// Copyright ©2013-2014, Jose Javier Gonzalez Ortiz. All rights reserved.
+
 // Libreria para la ejecucion del juego de la vida de Conway en el Cubo LED
 // life.c
 
@@ -23,7 +25,7 @@ void    effect_game_of_life_57_66   (uint8_t reset);
 void    effect_gol_glider_45_55     (uint8_t reset);
 void    effect_gol_glider_56_55     (uint8_t reset);
 void    effect_gol_glider_57_66     (uint8_t reset);
-void    effect_gol_blicker_57_66  (uint8_t reset);
+void    effect_gol_blicker_57_66    (uint8_t reset);
 
 void    gol_random_init             (void);
 void    gol_next_generation         (void);

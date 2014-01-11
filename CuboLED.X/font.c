@@ -1,4 +1,6 @@
 // Jose Javier Gonzalez Ortiz
+// Copyright ©2013-2014, Jose Javier Gonzalez Ortiz. All rights reserved.
+
 // Libreria para el manejo de caracteres alfanumericos en el cubo LED
 // font.c
 
@@ -6,8 +8,8 @@
 #include "font.h"
 
 #define _ASCII
-//#define _GREEK
-//#define _HIRAGANA
+#define _GREEK
+#define _HIRAGANA
 //#define _EXT
 
 static char message[MESSAGE_SIZE] = {"HELLO WORLD   "};
@@ -389,6 +391,10 @@ void    font_effect_standard_push_message   (uint8_t reset);
 void    font_effect_broadway_message        (uint8_t reset);
 void    font_effect_slide_message           (uint8_t reset);
 
+void    font_effect_display_ascii           (uint8_t reset);
+void    font_effect_display_greek           (uint8_t reset);
+void    font_effect_display_hiragana        (uint8_t reset);
+
 
 uint8_t getColumnFont                       (uint8_t* c,    uint8_t column);
 
@@ -452,12 +458,72 @@ void putAscii(uint8_t dim, uint8_t coord, char c)
         putFont(dim,coord,ascii[c-ASCII_OFFSET]);
 }
 
-/* Nombre: font_effect_push_message
- * Descripción: Efecto de empujar un mensaje a traves del cubo
- * Argumentos:  dim     - dimension en la que enviar el mensaje (X,Y,Z)
-                space   - separacion entre las letras
-                reset   - variable de reinicializacion del efecto
+
+/* Nombre: font_effect_display_ascii
+ * Descripción: Efecto de mostrar una a una la fuente ascii
+ * Argumentos:  reset - valor de reinicializacion del efecto
  * Valor devuelto: Ninguno */ 
+
+
+void font_effect_display_ascii(uint8_t reset)
+{
+    static uint8_t i;
+    if(reset)
+    {
+        i = 0;
+        return;
+    }
+    if(i >= 128-ASCII_OFFSET)
+    {
+        i = 0;
+    }
+    clearCube();
+    putFont(Y,4,ascii[i++]);
+}
+
+/* Nombre: font_effect_display_greek
+ * Descripción: Efecto de mostrar una a una la fuente griega
+ * Argumentos:  reset - valor de reinicializacion del efecto
+ * Valor devuelto: Ninguno */ 
+
+
+void font_effect_display_greek(uint8_t reset)
+{
+    static uint8_t i;
+    if(reset)
+    {
+        i = 0;
+        return;
+    }
+    if(i >= 58)
+    {
+        i = 0;
+    }
+    clearCube();
+    putFont(Y,4,greek[i++]);
+}
+
+/* Nombre: font_effect_display_hiragana
+ * Descripción: Efecto de mostrar una a una la fuente japonesa hiragana
+ * Argumentos:  reset - valor de reinicializacion del efecto
+ * Valor devuelto: Ninguno */ 
+
+
+void font_effect_display_hiragana(uint8_t reset)
+{
+    static uint8_t i;
+    if(reset)
+    {
+        i = 0;
+        return;
+    }
+    if(i >= 96)
+    {
+        i = 0;
+    }
+    clearCube();
+    putFont(Y,4,hiragana[i++]);
+}
 
 void font_effect_push_message(uint8_t dim, uint8_t space,uint8_t reset)
 {

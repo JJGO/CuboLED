@@ -1,4 +1,6 @@
 // Jose Javier Gonzalez Ortiz
+// Copyright ©2013-2014, Jose Javier Gonzalez Ortiz. All rights reserved.
+
 // Libreria para la definicion de efectos ejecutables por el CuboLED
 // effect.h
 
@@ -65,12 +67,13 @@ void        effect_wave                 (uint8_t  reset);
 void        effect_water_drop           (uint8_t  reset);
 void        effect_water_drop_2         (uint8_t  reset);
 void        effect_spiral               (uint8_t  reset);
-void        effect_lysa3d               (uint8_t  reset);
+void        effect_lissajous3d          (uint8_t  reset);
 void        effect_octahedron           (uint8_t  reset);
 void        effect_diagonal             (uint8_t  reset);
 void        effect_random_path          (uint8_t  reset);
 void        effect_load_bar             (uint8_t  reset);
 void        effect_random_fall          (uint8_t  reset);
+void        effect_broadway_binary      (uint8_t  reset);
 
 void        effect_random_path          (uint8_t reset);
 void        effect_load_bar             (uint8_t reset);
