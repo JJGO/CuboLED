@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Ingeniería Telecomunicación - ICAI</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <link href="{{ url_for('static',filename='css/estilos.css') }}" type="text/css" rel="stylesheet" />
+        <link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" type="text/css" rel="stylesheet" />
+        <script src="{{ url_for('static',filename='js/funciones.js') }}"></script>
+    </head>
+    <body>
+        <div class="cabecera">
+            <img src="{{ url_for('static',filename='images/logo_comillas.png') }}">
+            <!--img src="images/logo_icai.png"-->
+        </div>
+        <div class="contenido">
+            <h3 style="text-align:center">Telecomunicación
+            <br />ICAI</h3>
+            <form name="f" action="" method="GET" style="width: 100%;" class="navbar-form navbar-right" role="form">
+            <div style="margin:5px 0px 15px 10px;text-align:center;" >
+                <label>Efecto:</label>
+                <select name="cmd" class="form-control" onchange="if(f.cmd.value=='F21'){document.getElementById('texto').style.display='block';}else{document.getElementById('texto').style.display='none';}">
+                    <option value="E0">Demo</option>
+                    <option value="F21">Escribir Texto</option>
+                    <option value="E3">Efecto sweep plane</option>
+                    <option value="E4">Efecto draw cube</option>
+                    <option value="E5">Efecto animate cube</option>
+                    <option value="E6">Efecto expand cube</option>
+
+                    <option value="E7">Efecto octahedron</option>
+                    <option value="E8">Efecto diagonal</option>
+                    <option value="E9">Efecto crossing piramids</option>
+
+                    <option value="E10">Efecto random move</option>
+                    <option value="E11">Efecto random fill</option>
+                    <option value="E12">Efecto cascade</option>
+                    <option value="E13">Efecto rain</option>
+                    <option value="E14">Efecto random move vertical</option>
+                    <option value="E15">Efecto random fragment</option>
+
+                    <option value="E16">Efecto wave</option>
+                    <option value="E17">Efecto water drop</option>
+                    <option value="E18">Efecto water drop 2</option>
+                    <option value="E19">Efecto spiral</option>
+                    <option value="E20">Efecto lissajous3d</option>
+
+                    <option value="E21">font effect standard push message</option>
+                    <option value="E22">font effect broadway message</option>
+                    <option value="E23">font effect slide message</option>
+                    <option value="E25">game snake</option>
+                    <option value="E26">Efecto game of life 34 44</option>
+                    <option value="E27">Efecto gol glider 45 55</option>
+                    <option value="E28">Efecto gol glider 56 55</option>
+                    <option value="E29">Efecto gol glider 57 66</option>
+
+                    <option value="E30">Efecto random path</option>
+                    <option value="E31">Efecto load bar</option>
+                    <option value="E33">Efecto random fall</option>
+
+                    <option value="E34">Efecto broadway binary</option>
+
+                    <option value="E35">font effect display ascii</option>
+                    <option value="E36">font effect display greek</option>
+                    <option value="E37">font effect display hiragana</option>
+                </select>
+                <!--input type="text" size="20" name="cmd" placeholder="E1" class="form-control"-->
+                 <br />
+
+                <div id="texto" style="padding:10px; display:none" >
+                <label>Mensaje al cubo:</label>
+                <input type="text" size="20" name="msg" value="ICAI 2017" class="form-control">
+                </div>
+                <label>Velocidad:</label>
+                <div style="max-width: 250px; margin:auto; padding:10px">
+                <input name="vel" type="range" min="0" max="10" value="0" step="1" onchange="showValue(this.value)" />
+                <span id="range">0</span>
+                <script type="text/javascript">
+                function showValue(newValue)
+                {
+                    document.getElementById("range").innerHTML=newValue;
+                }
+                </script>
+                </div>
+
+            </div>
+            <!--button type="button" onclick="javascript:peticionAJAX();" class="btn btn-success">Mostrar</button-->
+            <button type="submit" class="btn btn-success">Mostrar</button>
+            <!--F20 F21 F22 -->
+        </form>
+        <div id="resultado">
+                {% if sent %}
+                  <h3>Enviado!</h3>
+                {% endif %}
+        </div>
+        </div>
+    </body>
+</html>
