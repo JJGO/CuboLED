@@ -36,7 +36,7 @@ with the user via serial communication.
     - serial -      Library to interact with the uart module and parse the commands and parameters received by it.
                     Echo is managed. 
 
-External libraries (other people work):
+External libraries (other people's work):
 
     - config -      General library for configuring the PLL oscillator and uart mapping.
 
