@@ -1,6 +1,11 @@
-==============
 LED Cube 8x8x8
 ==============
+
+![](https://i.imgur.com/PlWxtu5.jpg)
+
+## The Cube in action
+
+[![](https://img.youtube.com/vi/Bjb18RBypwo/0.jpg)](http://www.youtube.com/watch?v=Bjb18RBypwo)
 
 Author : Jose Javier Gonzalez Ortiz
 Copyright ©2013-2014, Jose Javier Gonzalez Ortiz. All rights reserved.
